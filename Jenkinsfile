@@ -16,7 +16,7 @@ podTemplate(label: 'mypod', containers: [
                 stage('try klar') {
                     sh 'echo "Test"'
                 }
-            },
+            }
         }
     }
 }
