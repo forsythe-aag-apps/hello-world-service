@@ -1,5 +1,7 @@
 podTemplate(label: 'mypod', containers: [
     containerTemplate(name: 'maven', image: 'maven:3.3.9-jdk-8-alpine', ttyEnabled: true, command: 'cat'),
+    containerTemplate(name: 'klar', image: 'klar:latest', ttyEnabled: true, command: 'echo'),
+
   ]) {
 
     node('mypod') {
@@ -10,6 +12,11 @@ podTemplate(label: 'mypod', containers: [
                     sh 'mvn -B clean install'
                 }
             }
+            container('klar') {
+                stage('try klar') {
+                    sh 'echo "Test"'
+                }
+            },
         }
     }
 }
