@@ -1,6 +1,6 @@
 podTemplate(label: 'mypod', containers: [
     containerTemplate(name: 'maven', image: 'maven:3.3.9-jdk-8-alpine', ttyEnabled: true, command: 'cat'),
-  //  containerTemplate(name: 'klar', image: 'klar:latest', ttyEnabled: true, command: 'echo'),
+    containerTemplate(name: 'klar', image: 'us.gcr.io/test-kubernetes-182712/klar, ttyEnabled: true, command: 'echo'),
 
   ]) {
 
