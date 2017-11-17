@@ -1,5 +1,9 @@
 podTemplate(label: 'mypod', containers: [
-    containerTemplate(name: 'maven', image: 'maven:3.3.9-jdk-8-alpine', ttyEnabled: true, command: 'cat'),
+    containerTemplate(name: 'maven', image: 'maven:3.3.9-jdk-8-alpine', envVars: [
+            envVar(key: 'MAVEN_SETTINGS_PATH', value: '/home/jenkins/.m2/settings.xml'),
+            secretEnvVar(key: 'MYSQL_PASSWORD', secretName: 'mysql-secret', secretKey: 'password'),
+            ...
+        ], ttyEnabled: true, command: 'cat'),
   ], volumes: [secretVolume(mountPath: '/home/jenkins/.m2/', secretName: 'jenkins-maven-settings')]) {
 
     node('mypod') {
