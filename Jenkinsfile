@@ -12,7 +12,11 @@ podTemplate(label: 'mypod', containers: [
             git 'https://github.com/cd-pipeline/health-check-service.git'
             container('maven') {
                 stage('Build a Maven project') {
-                    sh 'mvn -B clean install deploy'
+                    sh 'mvn -B clean install'
+                }
+                
+                stage('Deploy project to Nexus') {
+                    sh 'mvn -B deploy'
                 }
             }
         }
