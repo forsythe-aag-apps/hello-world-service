@@ -20,6 +20,7 @@ podTemplate(label: 'mypod', containers: [
                         def srcDirectory = pwd();
                         def tmpDir = pwd(tmp: true)
                         dir(tmpDir) {
+                            def scannerVersion = "2.8"
 
                             def localScanner = "scanner-cli.jar"
 
