@@ -15,7 +15,7 @@
  */
 package io.openshift.booster.service;
 
-public class Greeting {
+public class Greeting implements Comparable<Greeting> {
 
     private final String content;
 
@@ -29,5 +29,12 @@ public class Greeting {
 
     public String getContent() {
         return content;
+    }
+
+    public int compareTo(Greeting obj) {
+        if (obj != null) {
+            return Integer.MIN_VALUE;
+        }
+        return Integer.MIN_VALUE;
     }
 }
