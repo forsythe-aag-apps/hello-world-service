@@ -50,9 +50,11 @@ podTemplate(label: 'mypod', containers: [
             stage('Deploy project to Nexus') {
                 sh 'mvn -B package deploy'
             }
-
+        }
+        
+        container('docker') {
             stage('Docker build') {
-                sh 'docker build -t health-check-service .'
+               sh 'docker build -t health-check-service .'
             }
         }
     }
