@@ -11,7 +11,7 @@ spec:
     spec:
       containers:
         - name: health-check-service
-          image: us.gcr.io/test-kubernetes-182712/health-check-service
+          image: us.gcr.io/test-kubernetes-182712/hello-world-service
           ports:
             - containerPort: 8080
               name: http
