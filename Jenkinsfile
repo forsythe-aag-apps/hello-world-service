@@ -57,9 +57,38 @@ podTemplate(label: 'mypod', containers: [
            sh "kubectl delete service health-check-service -n cd-pipeline || true"
            sh "kubectl create -f ./deployment/deployment.yml -n cd-pipeline"
            sh "kubectl create -f ./deployment/service.yml -n cd-pipeline"
-           sh "kubectl create -f ./deployment/ingress.yml -n cd-pipeline"
            waitForAllPodsRunning('cd-pipeline')
            waitForAllServicesRunning('cd-pipeline')
+        }
+    }
+}
+
+def waitForAllPodsRunning(String namespace) {
+    timeout(60) {
+        while (true) {
+            podsStatus = sh(returnStdout: true, script: "kubectl --namespace='${namespace}' get pods --no-headers").trim()
+            def notRunning = podsStatus.readLines().findAll { line -> !line.contains('Running') }
+            if (notRunning.isEmpty()) {
+                echo 'All pods are running'
+                break
+            }
+            sh "kubectl --namespace='${namespace}' get pods"
+            sleep 10
+        }
+    }
+}
+
+def waitForAllServicesRunning(String namespace) {
+    timeout(60) {
+        while (true) {
+            servicesStatus = sh(returnStdout: true, script: "kubectl --namespace='${namespace}' get services --no-headers").trim()
+            def notRunning = servicesStatus.readLines().findAll { line -> line.contains('pending') }
+            if (notRunning.isEmpty()) {
+                echo 'All pods are running'
+                break
+            }
+            sh "kubectl --namespace='${namespace}' get services"
+            sleep 10
         }
     }
 }
