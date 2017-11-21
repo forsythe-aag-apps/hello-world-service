@@ -49,7 +49,7 @@ podTemplate(label: 'docker', containers: [containerTemplate(image: 'docker', nam
                 }
                 
                 stage('Docker build') {
-                    sh 'docker build -t ${env.JOB_NAME} .'
+                    sh 'docker build -t health-check-service .'
                 }
             }
         }
