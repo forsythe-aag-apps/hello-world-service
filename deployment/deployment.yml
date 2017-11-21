@@ -10,7 +10,7 @@ template:
         app: health-check-service
     spec:
     containers:
-    - name: health-check-service
+      - name: health-check-service
         image: health-check-service
         ports:
-        - containerPort: 8080
+          - containerPort: 8080
