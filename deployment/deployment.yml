@@ -1,0 +1,16 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+name: health-check-service
+spec:
+replicas: 1
+template:
+    metadata:
+    labels:
+        app: health-check-service
+    spec:
+    containers:
+    - name: health-check-service
+        image: health-check-service
+        ports:
+        - containerPort: 8080

@@ -5,7 +5,8 @@ podTemplate(label: 'mypod', containers: [
         envVars: [envVar(key: 'MAVEN_SETTINGS_PATH', value: '/root/.m2/settings.xml')], 
         ttyEnabled: true, 
         command: 'cat'),
-    containerTemplate(image: 'docker', name: 'docker', command: 'cat', ttyEnabled: true)
+    containerTemplate(image: 'docker', name: 'docker', command: 'cat', ttyEnabled: true),
+    containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.8.0', command: 'cat', ttyEnabled: true),
   ], volumes: [
     secretVolume(mountPath: '/root/.m2/', secretName: 'jenkins-maven-settings'),
     hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')
@@ -41,7 +42,7 @@ podTemplate(label: 'mypod', containers: [
             }
 
             stage('Deploy project to Nexus') {
-                sh 'mvn -B package deploy'
+                sh 'mvn -B -DskipTests=true package deploy'
             }
         }
         
@@ -49,6 +50,14 @@ podTemplate(label: 'mypod', containers: [
             stage('Docker build') {
                 sh 'docker build -t health-check-service .'
             }
+        }
+
+        container('kubectl') {
+           sh "kubectl create -f ./deployment/deployment.yml -n cd-pipeline"
+           sh "kubectl create -f ./deployment/service.yml -n cd-pipeline"
+           sh "kubectl create -f ./deployment/ingress.yml -n cd-pipeline"
+           waitForAllPodsRunning('cd-pipeline')
+           waitForAllServicesRunning('cd-pipeline')
         }
     }
 }
