@@ -45,7 +45,7 @@ podTemplate(label: 'docker', containers: [containerTemplate(image: 'docker', nam
                 }
 
                 stage('Deploy project to Nexus') {
-                    sh 'mvn -B deploy'
+                    sh 'mvn -B package deploy'
                 }
                 
                 stage('Docker build') {
