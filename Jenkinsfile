@@ -46,10 +46,8 @@ podTemplate(label: 'mypod', containers: [
         }
         
         container('docker') {
-            withDockerRegistry([credentialsId: 'docker-registry-credentials', url: "https://us.gcr.io"]) {
-                stage('Docker build') {
-                   sh 'docker build -t health-check-service .'
-                }
+            stage('Docker build') {
+                sh 'docker build -t health-check-service .'
             }
         }
     }
