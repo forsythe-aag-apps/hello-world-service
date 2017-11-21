@@ -14,3 +14,4 @@ spec:
           image: health-check-service
           ports:
             - containerPort: 8080
+            name: http

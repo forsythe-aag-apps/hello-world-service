@@ -53,6 +53,7 @@ podTemplate(label: 'mypod', containers: [
         }
 
         container('kubectl') {
+           sh "kubectl delete deployment health-check-service -n cd-pipeline || true"
            sh "kubectl create -f ./deployment/deployment.yml -n cd-pipeline"
            sh "kubectl create -f ./deployment/service.yml -n cd-pipeline"
            sh "kubectl create -f ./deployment/ingress.yml -n cd-pipeline"
