@@ -8,7 +8,7 @@ podTemplate(label: 'mypod', containers: [
     containerTemplate(image: 'docker', name: 'docker', command: 'cat', ttyEnabled: true),
     containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.8.0', command: 'cat', ttyEnabled: true),
   ], volumes: [
-    secretVolume(mountPath: '/home/jenkins/.dockercfg', secretName: 'regsecret'),
+    secretVolume(mountPath: '/home/jenkins', secretName: 'regsecret'),
     secretVolume(mountPath: '/root/.m2/', secretName: 'jenkins-maven-settings'),
     hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')
   ], imagePullSecrets: [ 'regsecret' ]) {
