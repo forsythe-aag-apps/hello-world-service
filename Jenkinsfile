@@ -8,8 +8,8 @@ podTemplate(label: 'mypod', containers: [
     containerTemplate(image: 'docker', name: 'docker', command: 'cat', ttyEnabled: true),
     containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.8.0', command: 'cat', ttyEnabled: true),
   ], volumes: [
+    secretVolume(mountPath: '/home/jenkins/.dockercfg', secretName: 'regsecret'),
     secretVolume(mountPath: '/root/.m2/', secretName: 'jenkins-maven-settings'),
-    secretVolume(mountPath: '/root/.dockercfg', secretName: 'regsecret'),
     hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')
   ], imagePullSecrets: [ 'regsecret' ]) {
 
@@ -49,7 +49,7 @@ podTemplate(label: 'mypod', containers: [
         
         container('docker') {
             stage('Docker build') {
-                //sh 'cat ~/.dockercfg'
+                sh 'cat ~/.dockercfg'
                 sh 'docker login --username zotovsa --password DSsdfj@f@1dx21354r quay.io'
                 sh 'docker build -t health-check-service .'
                 sh 'docker tag health-check-service quay.io/zotovsa/healthcheckservice'
