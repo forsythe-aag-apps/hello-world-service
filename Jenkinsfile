@@ -53,7 +53,7 @@ podTemplate(label: 'mypod', containers: [
                 sh 'docker login --username zotovsa --password DSsdfj@f@1dx21354r quay.io'
                 sh 'docker build -t health-check-service .'
                 sh 'docker tag health-check-service quay.io/zotovsa/healthcheckservice'
-                sh 'docker push quay.io/cd_pipeline/cloud-repository'
+                sh 'docker push quay.io/zotovsa/healthcheckservice'
             }
         }
 
