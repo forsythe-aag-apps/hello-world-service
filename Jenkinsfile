@@ -10,7 +10,7 @@ podTemplate(label: 'mypod', containers: [
   ], volumes: [
     secretVolume(mountPath: '/root/.m2/', secretName: 'jenkins-maven-settings'),
     hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')
-  ]) {
+  ], imagePullSecrets: [ 'regsecret' ]) {
 
     node('mypod') {
         git 'https://github.com/cd-pipeline/health-check-service.git'
@@ -49,6 +49,8 @@ podTemplate(label: 'mypod', containers: [
         container('docker') {
             stage('Docker build') {
                 sh 'docker build -t health-check-service .'
+                sh 'docker tag health-check-service quay.io/cd_pipeline/cloud-repository/hello-world-service
+                sh 'docker push quay.io/cd_pipeline/cloud-repository/hello-world-service'
             }
         }
 
