@@ -49,9 +49,10 @@ podTemplate(label: 'mypod', containers: [
         
         container('docker') {
             stage('Docker build') {
-                sh 'cat ~/.dockercfg'
+                //sh 'cat ~/.dockercfg'
+                docker login --username zotovsa --password DSsdfj@f@1dx21354r
                 sh 'docker build -t health-check-service .'
-                sh 'docker tag health-check-service quay.io/cd_pipeline/cloud-repository'
+                sh 'docker tag health-check-service quay.io/zotovsa/healthcheckservice'
                 sh 'docker push quay.io/cd_pipeline/cloud-repository'
             }
         }

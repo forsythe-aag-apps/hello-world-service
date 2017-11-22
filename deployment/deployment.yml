@@ -11,7 +11,7 @@ spec:
     spec:
       containers:
         - name: health-check-service
-          image: quay.io/cd_pipeline/cloud-repository
+          image: quay.io/zotovsa/healthcheckservic
           imagePullSecrets:
             - name: regsecret
           ports:
