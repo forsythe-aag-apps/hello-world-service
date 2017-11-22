@@ -50,7 +50,7 @@ podTemplate(label: 'mypod', containers: [
             stage('Docker build') {
                 sh 'docker build -t health-check-service .'
                 sh 'docker tag health-check-service quay.io/cd_pipeline/cloud-repository/hello-world-service'
-                sh 'docker push quay.io/cd_pipeline/cloud-repository/hello-world-service'
+                sh 'docker push quay.io/cd_pipeline/cloud-repository'
             }
         }
 
