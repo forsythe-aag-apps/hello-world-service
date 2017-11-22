@@ -11,9 +11,7 @@ spec:
     spec:
       containers:
         - name: health-check-service
-          image: quay.io/zotovsa/healthcheckservic
-          imagePullSecrets:
-            - name: regsecret
+          image: quay.io/zotovsa/healthcheckservice
           ports:
             - containerPort: 8080
               name: http
