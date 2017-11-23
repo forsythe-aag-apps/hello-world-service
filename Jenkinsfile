@@ -48,6 +48,13 @@ podTemplate(label: 'mypod', containers: [
             stage('Deploy project to Nexus') {
                 sh 'mvn -B -DskipTests=true package deploy'
             }
+
+            post {
+                always {
+                    archive 'target/*.jar'
+                    junit 'build/surefire-reports/*.xml'
+                }
+            }
         }
         
         container('docker') {
