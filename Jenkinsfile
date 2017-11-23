@@ -25,7 +25,6 @@ podTemplate(label: 'mypod', containers: [
                     sh 'ls -la target'
                 } finally {
                     junit 'target/surefire-reports/*.xml'
-                    archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
                 }
             }
 
@@ -53,6 +52,7 @@ podTemplate(label: 'mypod', containers: [
 
             stage('Deploy project to Nexus') {
                 sh 'mvn -B -DskipTests=true package deploy'
+                archiveArtifacts artifacts: 'target/*.jar'
             }
         }
         
