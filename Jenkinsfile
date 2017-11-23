@@ -25,6 +25,7 @@ podTemplate(label: 'mypod', containers: [
                     sh 'ls -la target'
                 } finally {
                     junit 'target/surefire-reports/*.xml'
+                    archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
                 }
             }
 
