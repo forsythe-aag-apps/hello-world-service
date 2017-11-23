@@ -47,7 +47,7 @@ podTemplate(label: 'mypod', containers: [
 
             stage('Deploy project to Nexus') {
                 sh 'mvn -B -DskipTests=true package deploy'
-                junit 'build/surefire-reports/*.xml'
+                junit './target/surefire-reports/*.xml'
             }
         }
         
