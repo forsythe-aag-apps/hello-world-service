@@ -21,6 +21,7 @@ podTemplate(label: 'mypod', containers: [
 
             stage('Run tests') {
                 sh 'mvn -B test'
+                junit './**/*.xml'
             }
 
             stage('SonarQube Analysis') {
@@ -47,7 +48,6 @@ podTemplate(label: 'mypod', containers: [
 
             stage('Deploy project to Nexus') {
                 sh 'mvn -B -DskipTests=true package deploy'
-                junit './target/surefire-reports/*.xml'
             }
         }
         
