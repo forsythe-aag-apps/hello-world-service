@@ -22,7 +22,7 @@ podTemplate(label: 'mypod', containers: [
             stage('Run tests') {
                 sh 'mvn -B test'
                 sh 'ls -la target'
-                junit './target/**/*.xml'
+                junit 'target/surefire-reports/*.xml'
             }
 
             stage('SonarQube Analysis') {
