@@ -21,8 +21,8 @@ podTemplate(label: 'mypod', containers: [
 
             stage('Run tests') {
                 sh 'mvn -B test'
-                sh 'ls -la'
-                junit './**/*.xml'
+                sh 'ls -la target'
+                junit './target/**/*.xml'
             }
 
             stage('SonarQube Analysis') {
