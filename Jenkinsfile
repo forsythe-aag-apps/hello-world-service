@@ -15,8 +15,12 @@ podTemplate(label: 'mypod', containers: [
     node('mypod') {
         git 'https://github.com/cd-pipeline/health-check-service.git'
         container('maven') {
-            stage('Build a Maven project') {
-                sh 'mvn -B clean install'
+            stage('Build a project') {
+                sh 'mvn -B clean install -DskipTests=true'
+            }
+
+            stage('Run tests') {
+                sh 'mvn -B test'
             }
 
             stage('SonarQube Analysis') {
