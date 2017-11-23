@@ -21,6 +21,7 @@ podTemplate(label: 'mypod', containers: [
 
             stage('Run tests') {
                 sh 'mvn -B test'
+                sh 'ls -la'
                 junit './**/*.xml'
             }
 
