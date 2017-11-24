@@ -10,13 +10,11 @@ import java.util.Arrays;
 
 @SpringBootApplication
 public class Application {
+    
+    public static String TEST_VALUE = "Test";
 
     public static void main(String[] args) {
-        try {
-            SpringApplication.run(Application.class, args);
-        } catch (Exception ex) {
-            throw ex;
-        }
+        SpringApplication.run(Application.class, args);
     }
 
     @Bean
