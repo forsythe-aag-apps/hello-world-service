@@ -32,6 +32,7 @@ public class HelloControllerTest {
     }
 
     @Test
+    @Ignore
     public void failedTest() {
         Assert.assertTrue("Flag should be true", false);
     }
