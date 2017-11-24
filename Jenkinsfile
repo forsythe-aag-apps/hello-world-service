@@ -13,7 +13,7 @@ podTemplate(label: 'mypod', containers: [
   ], imagePullSecrets: [ 'regsecret' ]) {
 
     node('mypod') {
-        git 'https://github.com/cd-pipeline/health-check-service.git'
+        git 'https://github.com/cd-pipeline/hello-world-service.git'
         container('maven') {
             stage('Build a project') {
                 sh 'mvn -B clean install -DskipTests=true'

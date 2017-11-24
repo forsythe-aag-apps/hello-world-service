@@ -1,17 +1,17 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: health-check-service
+  name: hello-world-service
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: health-check-service
+        app: hello-world-service
     spec:
       containers:
-        - name: health-check-service
-          image: quay.io/zotovsa/healthcheckservice
+        - name: hello-world-service
+          image: quay.io/zotovsa/hello-world-service
           ports:
             - containerPort: 8080
               name: http
