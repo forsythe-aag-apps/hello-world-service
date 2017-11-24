@@ -59,15 +59,15 @@ podTemplate(label: 'mypod', containers: [
         container('docker') {
             stage('Docker build') {
                 sh 'docker login --username zotovsa --password DSsdfj@f@1dx21354r quay.io'
-                sh 'docker build -t health-check-service .'
-                sh 'docker tag health-check-service quay.io/zotovsa/healthcheckservice'
-                sh 'docker push quay.io/zotovsa/healthcheckservice'
+                sh 'docker build -t hello-world-service .'
+                sh 'docker tag health-check-service quay.io/zotovsa/hello-world-service'
+                sh 'docker push quay.io/zotovsa/hello-world-service'
             }
         }
 
         container('kubectl') {
-           sh "kubectl delete deployment health-check-service -n cd-pipeline || true"
-           sh "kubectl delete service health-check-service -n cd-pipeline || true"
+           sh "kubectl delete deployment hello-world-service -n cd-pipeline || true"
+           sh "kubectl delete service hello-world-service -n cd-pipeline || true"
            sh "kubectl create -f ./deployment/deployment.yml -n cd-pipeline"
            sh "kubectl create -f ./deployment/service.yml -n cd-pipeline"
            waitForAllPodsRunning('cd-pipeline')
