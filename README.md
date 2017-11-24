@@ -1,3 +1,3 @@
-# health-check-service
-Health Check Service
+# hello-world-service
+Hello World Service
 
