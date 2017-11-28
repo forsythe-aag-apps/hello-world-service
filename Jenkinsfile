@@ -60,7 +60,7 @@ podTemplate(label: 'mypod', containers: [
             stage('Docker build') {
                 sh 'docker login --username zotovsa --password DSsdfj@f@1dx21354r quay.io'
                 sh 'docker build -t hello-world-service .'
-                sh 'docker tag health-check-service quay.io/zotovsa/hello-world-service'
+                sh 'docker tag hello-world-service quay.io/zotovsa/hello-world-service'
                 sh 'docker push quay.io/zotovsa/hello-world-service'
             }
         }
