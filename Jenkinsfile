@@ -66,12 +66,25 @@ podTemplate(label: 'mypod', containers: [
         }
 
         container('kubectl') {
-           sh "kubectl delete deployment hello-world-service -n cd-pipeline || true"
-           sh "kubectl delete service hello-world-service -n cd-pipeline || true"
-           sh "kubectl create -f ./deployment/deployment.yml -n cd-pipeline"
-           sh "kubectl create -f ./deployment/service.yml -n cd-pipeline"
-           waitForAllPodsRunning('cd-pipeline')
-           waitForAllServicesRunning('cd-pipeline')
+            stage('Deploy MicroService') { 
+               sh "kubectl delete deployment hello-world-service -n cd-pipeline || true"
+               sh "kubectl delete service hello-world-service -n cd-pipeline || true"
+               sh "kubectl create -f ./deployment/deployment.yml -n cd-pipeline"
+               sh "kubectl create -f ./deployment/service.yml -n cd-pipeline"
+               waitForAllPodsRunning('cd-pipeline')
+               waitForAllServicesRunning('cd-pipeline')
+            }
+        }
+        
+        input message: 'Deploy to Production?'
+        
+        container('kubectl') {
+           sh "kubectl delete deployment hello-world-service -n production || true"
+           sh "kubectl delete service hello-world-service -n production || true"
+           sh "kubectl create -f ./deployment/deployment.yml -n production"
+           sh "kubectl create -f ./deployment/service.yml -n production"
+           waitForAllPodsRunning('production')
+           waitForAllServicesRunning('production')
         }
     }
 }
