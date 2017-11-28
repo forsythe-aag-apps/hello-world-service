@@ -76,7 +76,9 @@ podTemplate(label: 'mypod', containers: [
             }
         }
         
-        input message: 'Deploy to Production?'
+        timeout(time: 3, unit: 'MINUTES') {
+            input message: 'Deploy to Production?'
+        }
         
         container('kubectl') {
            sh "kubectl delete deployment hello-world-service -n production || true"
@@ -90,7 +92,7 @@ podTemplate(label: 'mypod', containers: [
 }
 
 def waitForAllPodsRunning(String namespace) {
-    timeout(60) {
+    timeout(time: 3, unit: 'MINUTES') {
         while (true) {
             podsStatus = sh(returnStdout: true, script: "kubectl --namespace='${namespace}' get pods --no-headers").trim()
             def notRunning = podsStatus.readLines().findAll { line -> !line.contains('Running') }
@@ -105,7 +107,7 @@ def waitForAllPodsRunning(String namespace) {
 }
 
 def waitForAllServicesRunning(String namespace) {
-    timeout(60) {
+    timeout(time: 3, unit: 'MINUTES') {
         while (true) {
             servicesStatus = sh(returnStdout: true, script: "kubectl --namespace='${namespace}' get services --no-headers").trim()
             def notRunning = servicesStatus.readLines().findAll { line -> line.contains('pending') }
