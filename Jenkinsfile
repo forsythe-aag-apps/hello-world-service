@@ -15,7 +15,7 @@ podTemplate(label: 'mypod', containers: [
     node('mypod') {
         def projectNamespace = "${env.JOB_NAME}".tokenize('/')[0]
         print projectNamespace
-        
+
         git 'https://github.com/cd-pipeline/hello-world-service.git'
         container('maven') {
             stage('Build a project') {
@@ -78,11 +78,11 @@ podTemplate(label: 'mypod', containers: [
                waitForAllServicesRunning('${projectNamespace}')
             }
         }
-        
+
         timeout(time: 3, unit: 'MINUTES') {
             input message: 'Deploy to Production?'
         }
-        
+
         container('kubectl') {
            sh "kubectl delete deployment hello-world-service -n ${projectNamespace}-production || true"
            sh "kubectl delete service hello-world-service -n ${projectNamespace}-production || true"
