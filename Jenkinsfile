@@ -19,7 +19,6 @@ podTemplate(label: 'mypod', containers: [
         git 'https://github.com/cd-pipeline/hello-world-service.git'
         container('maven') {
             stage('Build a project') {
-                def projectNamespace = "${env.JOB_NAME}".tokenize('/')[0]
                 sh 'mvn -B clean install -DskipTests=true'
             }
 
@@ -71,8 +70,6 @@ podTemplate(label: 'mypod', containers: [
 
         container('kubectl') {
             stage('Deploy MicroService') {
-               def projectNamespace = "${env.JOB_NAME}".tokenize('/')[0]
-               print projectNamespace
                sh "kubectl delete deployment hello-world-service -n ${projectNamespace} || true"
                sh "kubectl delete service hello-world-service -n ${projectNamespace} || true"
                sh "kubectl create -f ./deployment/deployment.yml -n ${projectNamespace}"
@@ -87,8 +84,6 @@ podTemplate(label: 'mypod', containers: [
         }
         
         container('kubectl') {
-           def projectNamespace = "${env.JOB_NAME}".tokenize('/')[0]
-           print projectNamespace
            sh "kubectl delete deployment hello-world-service -n ${projectNamespace}-production || true"
            sh "kubectl delete service hello-world-service -n ${projectNamespace}-production || true"
            sh "kubectl create -f ./deployment/deployment.yml -n ${projectNamespace}-production"
