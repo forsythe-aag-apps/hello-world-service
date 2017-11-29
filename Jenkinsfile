@@ -13,7 +13,8 @@ podTemplate(label: 'mypod', containers: [
   ], imagePullSecrets: [ 'regsecret' ]) {
 
     node('mypod') {
-        sh 'echo ${env.JOB_NAME}'
+        def jobName = "${env.JOB_NAME}"
+        sh 'echo ${jobName}'
         git 'https://github.com/cd-pipeline/hello-world-service.git'
         container('maven') {
             stage('Build a project') {
