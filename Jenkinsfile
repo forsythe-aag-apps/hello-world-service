@@ -13,7 +13,7 @@ podTemplate(label: 'mypod', containers: [
   ], imagePullSecrets: [ 'regsecret' ]) {
 
     node('mypod') {
-        sh 'echo ${JOB_NAME}'
+        sh "echo ${JOB_NAME}.tokenize('/')[0]"
         git 'https://github.com/cd-pipeline/hello-world-service.git'
         container('maven') {
             stage('Build a project') {
