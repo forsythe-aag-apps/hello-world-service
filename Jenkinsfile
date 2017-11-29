@@ -14,7 +14,11 @@ podTemplate(label: 'mypod', containers: [
 
     node('mypod') {
         def projectNamespace = "${env.JOB_NAME}".tokenize('/')[0]
-        print projectNamespace
+         container('kubectl') {
+            stage('Configure Kubernetes') {
+               sh "kubectl create namespace ${projectNamespace} || true"
+            }
+         }
 
         git 'https://github.com/cd-pipeline/hello-world-service.git'
         container('maven') {
