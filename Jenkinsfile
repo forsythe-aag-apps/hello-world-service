@@ -1,3 +1,4 @@
+def jobName = "${env.JOB_NAME}"
 podTemplate(label: 'mypod', containers: [
     containerTemplate(
         name: 'maven', 
@@ -13,7 +14,6 @@ podTemplate(label: 'mypod', containers: [
   ], imagePullSecrets: [ 'regsecret' ]) {
 
     node('mypod') {
-        def jobName = "${env.JOB_NAME}"
         sh 'echo ${jobName}'
         git 'https://github.com/cd-pipeline/hello-world-service.git'
         container('maven') {
