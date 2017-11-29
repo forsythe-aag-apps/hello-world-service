@@ -13,11 +13,11 @@ podTemplate(label: 'mypod', containers: [
   ], imagePullSecrets: [ 'regsecret' ]) {
 
     node('mypod') {
-        def projectNamespace = "${JOB_NAME}"
-        sh 'echo ${projectNamespace}'
         git 'https://github.com/cd-pipeline/hello-world-service.git'
         container('maven') {
             stage('Build a project') {
+                def projectNamespace = "${env.JOB_NAME}".tokenize('/')[0]
+                print projectNamespace
                 sh 'mvn -B clean install -DskipTests=true'
             }
 
@@ -68,13 +68,15 @@ podTemplate(label: 'mypod', containers: [
         }
 
         container('kubectl') {
-            stage('Deploy MicroService') { 
-               sh "kubectl delete deployment hello-world-service -n cd-pipeline || true"
-               sh "kubectl delete service hello-world-service -n cd-pipeline || true"
-               sh "kubectl create -f ./deployment/deployment.yml -n cd-pipeline"
-               sh "kubectl create -f ./deployment/service.yml -n cd-pipeline"
-               waitForAllPodsRunning('cd-pipeline')
-               waitForAllServicesRunning('cd-pipeline')
+            stage('Deploy MicroService') {
+               def projectNamespace = "${env.JOB_NAME}".tokenize('/')[0]
+               print projectNamespace
+               sh "kubectl delete deployment hello-world-service -n ${projectNamespace} || true"
+               sh "kubectl delete service hello-world-service -n ${projectNamespace} || true"
+               sh "kubectl create -f ./deployment/deployment.yml -n ${projectNamespace}"
+               sh "kubectl create -f ./deployment/service.yml -n ${projectNamespace}"
+               waitForAllPodsRunning('${projectNamespace}')
+               waitForAllServicesRunning('${projectNamespace}')
             }
         }
         
@@ -83,12 +85,14 @@ podTemplate(label: 'mypod', containers: [
         }
         
         container('kubectl') {
-           sh "kubectl delete deployment hello-world-service -n production || true"
-           sh "kubectl delete service hello-world-service -n production || true"
-           sh "kubectl create -f ./deployment/deployment.yml -n production"
-           sh "kubectl create -f ./deployment/service.yml -n production"
-           waitForAllPodsRunning('production')
-           waitForAllServicesRunning('production')
+           def projectNamespace = "${env.JOB_NAME}".tokenize('/')[0]
+           print projectNamespace
+           sh "kubectl delete deployment hello-world-service -n ${projectNamespace}-production || true"
+           sh "kubectl delete service hello-world-service -n ${projectNamespace}-production || true"
+           sh "kubectl create -f ./deployment/deployment.yml -n ${projectNamespace}-production"
+           sh "kubectl create -f ./deployment/service.yml -n ${projectNamespace}-production"
+           waitForAllPodsRunning('${projectNamespace}-production')
+           waitForAllServicesRunning('${projectNamespace}-production')
         }
     }
 }
