@@ -17,6 +17,7 @@ podTemplate(label: 'mypod', containers: [
          container('kubectl') {
             stage('Configure Kubernetes') {
                sh "kubectl create namespace ${projectNamespace} || true"
+               sh "kubectl create namespace ${projectNamespace}-production || true"
             }
          }
 
