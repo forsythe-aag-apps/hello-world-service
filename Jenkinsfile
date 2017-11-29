@@ -13,7 +13,7 @@ podTemplate(label: 'mypod', containers: [
   ], imagePullSecrets: [ 'regsecret' ]) {
 
     node('mypod') {
-        def projectNamespace = JOB_NAME.tokenize('/')[0]
+        def projectNamespace = JOB_NAME
         sh 'echo ${projectNamespace}'
         git 'https://github.com/cd-pipeline/hello-world-service.git'
         container('maven') {
