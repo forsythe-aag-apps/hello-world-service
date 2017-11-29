@@ -13,11 +13,13 @@ podTemplate(label: 'mypod', containers: [
   ], imagePullSecrets: [ 'regsecret' ]) {
 
     node('mypod') {
+        def projectNamespace = "${env.JOB_NAME}".tokenize('/')[0]
+        print projectNamespace
+        
         git 'https://github.com/cd-pipeline/hello-world-service.git'
         container('maven') {
             stage('Build a project') {
                 def projectNamespace = "${env.JOB_NAME}".tokenize('/')[0]
-                print projectNamespace
                 sh 'mvn -B clean install -DskipTests=true'
             }
 
