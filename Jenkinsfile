@@ -30,8 +30,7 @@ podTemplate(label: 'mypod', containers: [
 
             stage('Run tests') {
                 try {
-                    sh 'mvn -B test'
-                    sh 'ls -la target'
+                    sh 'mvn -B clean install test'
                 } finally {
                     junit 'target/surefire-reports/*.xml'
                 }
