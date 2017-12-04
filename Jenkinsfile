@@ -78,25 +78,25 @@ podTemplate(label: 'mypod', containers: [
                sh "kubectl delete service hello-world-service -n ${projectNamespace} || true"
                sh "kubectl create -f ./deployment/deployment.yml -n ${projectNamespace}"
                sh "kubectl create -f ./deployment/service.yml -n ${projectNamespace}"
-               waitForAllPodsRunning('${projectNamespace}')
-               waitForAllServicesRunning('${projectNamespace}')
+               waitForAllPodsRunning("${projectNamespace}")
+               waitForAllServicesRunning("${projectNamespace}")
             }
         }
 
         container('kubectl') {
             timeout(time: 3, unit: 'MINUTES') {
                 serviceEndpoint = sh(returnStdout: true, script: "kubectl --namespace='${namespace}' get svc hello-world-service --no-headers --template '{{ range (index .status.loadBalancer.ingress 0) }}{{ . }}{{ end }}'").trim()
-                input message: 'Service deployed to Dev: http://${serviceEndpoint}:8080. Deploy to Production?'
+                input message: "Service deployed to Dev: http://${serviceEndpoint}:8080. Deploy to Production?"
             }
         }
 
         container('kubectl') {
-           sh "kubectl delete deployment hello-world-service -n ${projectNamespace}-production || true"
-           sh "kubectl delete service hello-world-service -n ${projectNamespace}-production || true"
-           sh "kubectl create -f ./deployment/deployment.yml -n ${projectNamespace}-production"
-           sh "kubectl create -f ./deployment/service.yml -n ${projectNamespace}-production"
-           waitForAllPodsRunning('${projectNamespace}-production')
-           waitForAllServicesRunning('${projectNamespace}-production')
+           sh "kubectl delete deployment hello-world-service -n prod-${projectNamespace} || true"
+           sh "kubectl delete service hello-world-service -n production-${projectNamespace} || true"
+           sh "kubectl create -f ./deployment/deployment.yml -n prod-${projectNamespace}"
+           sh "kubectl create -f ./deployment/service.yml -n prod-${projectNamespace}"
+           waitForAllPodsRunning("prod-${projectNamespace}")
+           waitForAllServicesRunning("prod-{projectNamespace}")
         }
     }
 }
