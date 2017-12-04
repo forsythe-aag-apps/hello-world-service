@@ -83,8 +83,11 @@ podTemplate(label: 'mypod', containers: [
             }
         }
 
-        timeout(time: 3, unit: 'MINUTES') {
-            input message: 'Deploy to Production?'
+        container('kubectl') {
+            timeout(time: 3, unit: 'MINUTES') {
+                serviceEndpoint = sh(returnStdout: true, script: "kubectl --namespace='${namespace}' get svc hello-world-service --no-headers --template '{{ range (index .status.loadBalancer.ingress 0) }}{{ . }}{{ end }}'").trim()
+                input message: 'Service deployed to Dev: http://${serviceEndpoint}:8080. Deploy to Production?'
+            }
         }
 
         container('kubectl') {
