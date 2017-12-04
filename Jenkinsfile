@@ -18,7 +18,6 @@ podTemplate(label: 'mypod', containers: [
          container('kubectl') {
             stage('Configure Kubernetes') {
                sh "kubectl create namespace ${projectNamespace} || true"
-               sh "kubectl create namespace ${projectNamespace}-production || true"
             }
          }
 
@@ -92,6 +91,7 @@ podTemplate(label: 'mypod', containers: [
         }
 
         container('kubectl') {
+           sh "kubectl create namespace ${projectNamespace}-production || true"
            sh "kubectl delete deployment hello-world-service -n prod-${projectNamespace} || true"
            sh "kubectl delete service hello-world-service -n prod-${projectNamespace} || true"
            sh "kubectl create -f ./deployment/deployment.yml -n prod-${projectNamespace}"
