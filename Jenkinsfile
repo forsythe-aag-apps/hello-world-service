@@ -82,6 +82,12 @@ podTemplate(label: 'mypod', containers: [
                waitForAllServicesRunning("${projectNamespace}")
             }
         }
+        
+        container('kubectl') {
+            serviceEndpoint = sh(returnStdout: true, script: "kubectl --namespace='${projectNamespace}' get svc hello-world-service --no-headers --template '{{ range (index .status.loadBalancer.ingress 0) }}{{ . }}{{ end }}'").trim()
+            print "Service deployed to Dev: http://${serviceEndpoint}:8080"
+        }
+
 
         container('kubectl') {
             timeout(time: 3, unit: 'MINUTES') {
