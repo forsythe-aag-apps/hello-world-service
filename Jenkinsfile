@@ -91,7 +91,7 @@ podTemplate(label: 'mypod', containers: [
         }
 
         container('kubectl') {
-           sh "kubectl create namespace ${projectNamespace}-production || true"
+           sh "kubectl create namespace prod-${projectNamespace} || true"
            sh "kubectl delete deployment hello-world-service -n prod-${projectNamespace} || true"
            sh "kubectl delete service hello-world-service -n prod-${projectNamespace} || true"
            sh "kubectl create -f ./deployment/deployment.yml -n prod-${projectNamespace}"
