@@ -84,21 +84,16 @@ podTemplate(label: 'mypod', containers: [
         }
         
         container('kubectl') {
-            serviceEndpoint = sh(returnStdout: true, script: "kubectl --namespace='${projectNamespace}' get svc hello-world-service --no-headers --template '{{ range (index .status.loadBalancer.ingress 0) }}{{ . }}{{ end }}'").trim()
-            print "Service deployed to Dev: http://${serviceEndpoint}:8080"
-        }
-
-
-        container('kubectl') {
             timeout(time: 3, unit: 'MINUTES') {
                 serviceEndpoint = sh(returnStdout: true, script: "kubectl --namespace='${projectNamespace}' get svc hello-world-service --no-headers --template '{{ range (index .status.loadBalancer.ingress 0) }}{{ . }}{{ end }}'").trim()
+                print "Service deployed to Dev: http://${serviceEndpoint}:8080"
                 input message: "Service deployed to Dev: http://${serviceEndpoint}:8080. Deploy to Production?"
             }
         }
 
         container('kubectl') {
            sh "kubectl delete deployment hello-world-service -n prod-${projectNamespace} || true"
-           sh "kubectl delete service hello-world-service -n production-${projectNamespace} || true"
+           sh "kubectl delete service hello-world-service -n prod-${projectNamespace} || true"
            sh "kubectl create -f ./deployment/deployment.yml -n prod-${projectNamespace}"
            sh "kubectl create -f ./deployment/service.yml -n prod-${projectNamespace}"
            waitForAllPodsRunning("prod-${projectNamespace}")
