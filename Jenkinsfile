@@ -85,8 +85,8 @@ podTemplate(label: 'mypod', containers: [
         container('kubectl') {
             timeout(time: 3, unit: 'MINUTES') {
                 serviceEndpoint = sh(returnStdout: true, script: "kubectl --namespace='${projectNamespace}' get svc hello-world-service --no-headers --template '{{ range (index .status.loadBalancer.ingress 0) }}{{ . }}{{ end }}'").trim()
-                print "Service deployed to Dev: http://${serviceEndpoint}:8080"
-                input message: "Service deployed to Dev: http://${serviceEndpoint}:8080. Deploy to Production?"
+                print "Service deployed to dev environment: http://${serviceEndpoint}:8080"
+                input message: "Service deployed to dev environment: http://${serviceEndpoint}:8080. Deploy to Production?"
             }
         }
 
@@ -98,6 +98,8 @@ podTemplate(label: 'mypod', containers: [
            sh "kubectl create -f ./deployment/service.yml -n prod-${projectNamespace}"
            waitForAllPodsRunning("prod-${projectNamespace}")
            waitForAllServicesRunning("prod-{projectNamespace}")
+           productionEndpoint = sh(returnStdout: true, script: "kubectl --namespace='prod-${projectNamespace}' get svc hello-world-service --no-headers --template '{{ range (index .status.loadBalancer.ingress 0) }}{{ . }}{{ end }}'").trim()
+           print "Service deployed to production: http://${serviceEndpoint}:8080"
         }
     }
 }
