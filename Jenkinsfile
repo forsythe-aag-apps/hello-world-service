@@ -24,12 +24,12 @@ podTemplate(label: 'mypod', containers: [
         git 'https://github.com/cd-pipeline/hello-world-service.git'
         container('maven') {
             stage('Build a project') {
-                sh 'mvn -B clean install -DskipTests=true'
+                sh 'mvn clean install -DskipTests=true'
             }
 
             stage('Run tests') {
                 try {
-                    sh 'mvn -B clean install test'
+                    sh 'mvn clean install test'
                 } finally {
                     junit 'target/surefire-reports/*.xml'
                 }
@@ -58,7 +58,7 @@ podTemplate(label: 'mypod', containers: [
             }
 
             stage('Deploy project to Nexus') {
-                sh 'mvn -B -DskipTests=true package deploy'
+                sh 'mvn -DskipTests=true package deploy'
                 archiveArtifacts artifacts: 'target/*.jar'
             }
         }
