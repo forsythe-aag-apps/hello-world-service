@@ -99,7 +99,7 @@ podTemplate(label: 'mypod', containers: [
            waitForAllPodsRunning("prod-${projectNamespace}")
            waitForAllServicesRunning("prod-{projectNamespace}")
            productionEndpoint = sh(returnStdout: true, script: "kubectl --namespace='prod-${projectNamespace}' get svc hello-world-service --no-headers --template '{{ range (index .status.loadBalancer.ingress 0) }}{{ . }}{{ end }}'").trim()
-           print "Service deployed to production: http://${serviceEndpoint}:8080"
+           print "Service deployed to production: http://${productionEndpoint}:8080"
         }
     }
 }
