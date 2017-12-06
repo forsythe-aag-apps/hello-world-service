@@ -44,7 +44,7 @@ podTemplate(label: 'mypod', containers: [
                 def srcDirectory = pwd();
                 def tmpDir = pwd(tmp: true)
                 dir(tmpDir) {
-                    util.analyzeCode("${env.JOB_NAME}", srcDirectory)
+                    utils.analyzeCode("${env.JOB_NAME}", srcDirectory)
                 }
             }
 
