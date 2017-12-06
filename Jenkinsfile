@@ -1,4 +1,6 @@
-@Library('github.com/forsythe-aag-devops/pipeline-library@master')
+#!/usr/bin/env groovy
+
+@Library('github.com/forsythe-aag-devops/pipeline-library@master') _
 podTemplate(label: 'mypod', containers: [
     containerTemplate(
         name: 'maven', 
