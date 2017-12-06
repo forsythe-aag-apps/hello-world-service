@@ -19,7 +19,7 @@ podTemplate(label: 'mypod', containers: [
   ], imagePullSecrets: [ 'regsecret' ]) {
 
     node('mypod') {
-        def projectNamespace = extractNamespace()
+        def projectNamespace = KubernetesCommands.extractNamespace()
         container('kubectl') {
             stage('Configure Kubernetes') {
                 createNamespace(projectNamespace)
@@ -103,8 +103,4 @@ podTemplate(label: 'mypod', containers: [
            waitForValidNamespaceState(projectNamespace)
         }
     }
-}
-
-def extractNamespace() {
-    return "${env.JOB_NAME}".tokenize('/')[0]
 }
