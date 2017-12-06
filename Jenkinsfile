@@ -1,7 +1,7 @@
 #!/usr/bin/env groovy
 
 @Library('github.com/forsythe-aag-devops/pipeline-library@master') _
-import com.forsythe.KubernetesCommands
+commands = new com.forsythe.KubernetesCommands()
 
 podTemplate(label: 'mypod', containers: [
     containerTemplate(
@@ -22,7 +22,7 @@ podTemplate(label: 'mypod', containers: [
         def projectNamespace = KubernetesCommands.extractNamespace()
         container('kubectl') {
             stage('Configure Kubernetes') {
-                createNamespace(projectNamespace)
+                commands.createNamespace(projectNamespace)
             }
         }
 
