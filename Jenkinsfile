@@ -1,6 +1,8 @@
 #!/usr/bin/env groovy
 
 @Library('github.com/forsythe-aag-devops/pipeline-library@master') _
+import com.forsythe.KubernetesCommands
+
 podTemplate(label: 'mypod', containers: [
     containerTemplate(
         name: 'maven', 
@@ -17,12 +19,12 @@ podTemplate(label: 'mypod', containers: [
   ], imagePullSecrets: [ 'regsecret' ]) {
 
     node('mypod') {
-        def projectNamespace = "${env.JOB_NAME}".tokenize('/')[0]
-         container('kubectl') {
+        def projectNamespace = extractNamespace()
+        container('kubectl') {
             stage('Configure Kubernetes') {
-               sh "kubectl create namespace ${projectNamespace} || true"
+                createNamespace(projectNamespace)
             }
-         }
+        }
 
         git 'https://github.com/cd-pipeline/hello-world-service.git'
         container('maven') {
@@ -76,12 +78,11 @@ podTemplate(label: 'mypod', containers: [
 
         container('kubectl') {
             stage('Deploy MicroService') {
-               sh "kubectl delete deployment hello-world-service -n ${projectNamespace} || true"
-               sh "kubectl delete service hello-world-service -n ${projectNamespace} || true"
+               sh "kubectl delete deployment hello-world-service -n ${projectNamespace} --ignore-not-found=true"
+               sh "kubectl delete service hello-world-service -n ${projectNamespace} --ignore-not-found=true"
                sh "kubectl create -f ./deployment/deployment.yml -n ${projectNamespace}"
                sh "kubectl create -f ./deployment/service.yml -n ${projectNamespace}"
-               waitForAllPodsRunning("${projectNamespace}")
-               waitForAllServicesRunning("${projectNamespace}")
+               waitForValidNamespaceState(projectNamespace)
             }
         }
         
@@ -95,42 +96,11 @@ podTemplate(label: 'mypod', containers: [
 
         container('kubectl') {
            sh "kubectl create namespace prod-${projectNamespace} || true"
-           sh "kubectl delete deployment hello-world-service -n prod-${projectNamespace} || true"
-           sh "kubectl delete service hello-world-service -n prod-${projectNamespace} || true"
+           sh "kubectl delete deployment hello-world-service -n prod-${projectNamespace} --ignore-not-found=true"
+           sh "kubectl delete service hello-world-service -n prod-${projectNamespace} --ignore-not-found=true"
            sh "kubectl create -f ./deployment/deployment.yml -n prod-${projectNamespace}"
            sh "kubectl create -f ./deployment/service.yml -n prod-${projectNamespace}"
-           waitForAllPodsRunning("prod-${projectNamespace}")
-           waitForAllServicesRunning("prod-{projectNamespace}")
-        }
-    }
-}
-
-def waitForAllPodsRunning(String namespace) {
-    timeout(time: 3, unit: 'MINUTES') {
-        while (true) {
-            podsStatus = sh(returnStdout: true, script: "kubectl --namespace='${namespace}' get pods --no-headers").trim()
-            def notRunning = podsStatus.readLines().findAll { line -> !line.contains('Running') }
-            if (notRunning.isEmpty()) {
-                echo 'All pods are running'
-                break
-            }
-            sh "kubectl --namespace='${namespace}' get pods"
-            sleep 10
-        }
-    }
-}
-
-def waitForAllServicesRunning(String namespace) {
-    timeout(time: 3, unit: 'MINUTES') {
-        while (true) {
-            servicesStatus = sh(returnStdout: true, script: "kubectl --namespace='${namespace}' get services --no-headers").trim()
-            def notRunning = servicesStatus.readLines().findAll { line -> line.contains('pending') }
-            if (notRunning.isEmpty()) {
-                echo 'All pods are running'
-                break
-            }
-            sh "kubectl --namespace='${namespace}' get services"
-            sleep 10
+           waitForValidNamespaceState(projectNamespace)
         }
     }
 }
