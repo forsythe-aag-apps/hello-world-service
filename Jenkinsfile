@@ -19,10 +19,10 @@ podTemplate(label: 'mypod', containers: [
   ], imagePullSecrets: [ 'regsecret' ]) {
 
     node('mypod') {
-        def projectNamespace = utils.extractNamespace()
+        def projectNamespace = utils.extractNamespace("${env.JOB_NAME}")
         container('kubectl') {
             stage('Configure Kubernetes') {
-                commands.createNamespace(projectNamespace)
+                utils.createNamespace(projectNamespace)
             }
         }
 
@@ -82,13 +82,13 @@ podTemplate(label: 'mypod', containers: [
                sh "kubectl delete service hello-world-service -n ${projectNamespace} --ignore-not-found=true"
                sh "kubectl create -f ./deployment/deployment.yml -n ${projectNamespace}"
                sh "kubectl create -f ./deployment/service.yml -n ${projectNamespace}"
-               waitForValidNamespaceState(projectNamespace)
+               utils.waitForValidNamespaceState(projectNamespace)
             }
         }
         
         container('kubectl') {
             timeout(time: 3, unit: 'MINUTES') {
-                serviceEndpoint = sh(returnStdout: true, script: "kubectl --namespace='${projectNamespace}' get svc hello-world-service --no-headers --template '{{ range (index .status.loadBalancer.ingress 0) }}{{ . }}{{ end }}'").trim()
+                serviceEndpoint = utils.extractServiceEndpoint(projectNamespace, "hello-world-service")
                 print "Service deployed to dev environment: http://${serviceEndpoint}:8080"
                 input message: "Service deployed to dev environment: http://${serviceEndpoint}:8080. Deploy to Production?"
             }
@@ -100,7 +100,7 @@ podTemplate(label: 'mypod', containers: [
            sh "kubectl delete service hello-world-service -n prod-${projectNamespace} --ignore-not-found=true"
            sh "kubectl create -f ./deployment/deployment.yml -n prod-${projectNamespace}"
            sh "kubectl create -f ./deployment/service.yml -n prod-${projectNamespace}"
-           waitForValidNamespaceState(projectNamespace)
+           utils.waitForValidNamespaceState(projectNamespace)
         }
     }
 }
