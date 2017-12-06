@@ -1,3 +1,4 @@
+@Library('github.com/forsythe-aag-devops/pipeline-library@master')
 podTemplate(label: 'mypod', containers: [
     containerTemplate(
         name: 'maven', 
