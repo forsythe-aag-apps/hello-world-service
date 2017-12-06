@@ -104,3 +104,7 @@ podTemplate(label: 'mypod', containers: [
         }
     }
 }
+
+def extractNamespace() {
+    return "${env.JOB_NAME}".tokenize('/')[0]
+}
