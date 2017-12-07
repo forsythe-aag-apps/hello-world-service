@@ -66,7 +66,7 @@ podTemplate(label: 'mypod', containers: [
                sh "kubectl delete service hello-world-service -n ${projectNamespace} --ignore-not-found=true"
                sh "kubectl create -f ./deployment/deployment.yml -n ${projectNamespace}"
                sh "kubectl create -f ./deployment/service.yml -n ${projectNamespace}"
-               waitForRunningState(namespace: projectNamespace)
+               waitForRunningState(projectNamespace)
             }
         }
         
@@ -83,7 +83,7 @@ podTemplate(label: 'mypod', containers: [
            sh "kubectl delete service hello-world-service -n prod-${projectNamespace} --ignore-not-found=true"
            sh "kubectl create -f ./deployment/deployment.yml -n prod-${projectNamespace}"
            sh "kubectl create -f ./deployment/service.yml -n prod-${projectNamespace}"
-           waitForRunningState namespace: "prod-${projectNamespace}"
+           waitForRunningState("prod-${projectNamespace}")
         }
     }
 }
