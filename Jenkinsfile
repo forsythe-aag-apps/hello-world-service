@@ -14,7 +14,7 @@ podTemplate(label: 'mypod', containers: [
     containerTemplate(image: 'docker', name: 'docker', command: 'cat', ttyEnabled: true),
     containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.8.0', command: 'cat', ttyEnabled: true),
   ], volumes: [
-    secretVolume(mountPath: '/root/.m2/', secretName: 'jenkins-maven-settings'),
+    persistentVolumeClaim(mountPath: '/root/.m2', claimName: 'maven-repo-claim')
     secretVolume(mountPath: '/home/jenkins/.docker', secretName: 'regsecret'),
     hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')
   ], imagePullSecrets: [ 'regsecret' ]) {
@@ -66,7 +66,7 @@ podTemplate(label: 'mypod', containers: [
                sh "kubectl delete service hello-world-service -n ${projectNamespace} --ignore-not-found=true"
                sh "kubectl create -f ./deployment/deployment.yml -n ${projectNamespace}"
                sh "kubectl create -f ./deployment/service.yml -n ${projectNamespace}"
-               waitForRunningState namespace: projectNamespace
+               waitForRunningState(namespace: projectNamespace)
             }
         }
         
