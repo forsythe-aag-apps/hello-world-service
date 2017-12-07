@@ -16,7 +16,7 @@ podTemplate(label: 'mypod', containers: [
   ], volumes: [
     secretVolume(mountPath: '/home/jenkins/.docker', secretName: 'regsecret'),
     hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock'),
-    hostPathVolume(hostPath: '/root/.m2/repository', mountPath: '/home/jenkins/.m2/repository')
+    hostPathVolume(hostPath: '/root/.m2', mountPath: '/home/jenkins/.m2')
   ], imagePullSecrets: [ 'regsecret' ]) {
 
     node('mypod') {
