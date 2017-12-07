@@ -1,6 +1,7 @@
 #!/usr/bin/env groovy
 
-@Library('github.com/forsythe-aag-devops/pipeline-library@master') import com.forsythe.PipelineUtils
+@Library('github.com/forsythe-aag-devops/pipeline-library@master')
+import com.forsythe.PipelineUtils
 def utils = new PipelineUtils(this)
 
 podTemplate(label: 'mypod', containers: [
@@ -41,10 +42,7 @@ podTemplate(label: 'mypod', containers: [
             }
 
             stage('SonarQube Analysis') {
-                def srcDirectory = pwd();
-                def tmpDir = pwd(tmp: true)
-                dir(tmpDir) {
-                    utils.analyzeCode("${env.JOB_NAME}", srcDirectory)
+                sonarQubeScanner {
                 }
             }
 
