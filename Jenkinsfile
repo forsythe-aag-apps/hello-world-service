@@ -16,7 +16,8 @@ podTemplate(label: 'mypod', containers: [
   ], volumes: [
     secretVolume(mountPath: '/root/.m2/', secretName: 'jenkins-maven-settings'),
     secretVolume(mountPath: '/home/jenkins/.docker', secretName: 'regsecret'),
-    hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')
+    hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock'),
+    persistentVolumeClaim(claimName: 'maven-local-repo', mountPath: '/root/.m2nrepo')
   ], imagePullSecrets: [ 'regsecret' ]) {
 
     node('mypod') {
@@ -73,7 +74,7 @@ podTemplate(label: 'mypod', containers: [
         container('kubectl') {
             timeout(time: 3, unit: 'MINUTES') {
                 printEndpoint(namespace: projectNamespace, serviceId: "hello-world-service",
-                    serviceName: "Hello World Service", servicePort: "8080")
+                    serviceName: "Hello World Service", port: "8080")
                 input message: "Deploy to Production?"
             }
         }
