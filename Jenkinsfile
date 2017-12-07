@@ -74,9 +74,12 @@ podTemplate(label: 'mypod', containers: [
         
         container('kubectl') {
             timeout(time: 3, unit: 'MINUTES') {
-                serviceEndpoint = utils.extractServiceEndpoint(projectNamespace, "hello-world-service")
-                print "Service deployed to dev environment: http://${serviceEndpoint}:8080"
-                input message: "Service deployed to dev environment: http://${serviceEndpoint}:8080. Deploy to Production?"
+                printEndpoint {
+                    serviceId = "hello-world-service"
+                    serviceName = "Hello World Service"
+                }
+
+                input message: "Deploy to Production?"
             }
         }
 
