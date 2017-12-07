@@ -74,11 +74,7 @@ podTemplate(label: 'mypod', containers: [
         
         container('kubectl') {
             timeout(time: 3, unit: 'MINUTES') {
-                printEndpoint {
-                    serviceId = "hello-world-service"
-                    serviceName = "Hello World Service"
-                }
-
+                printEndpoint(serviceId: "hello-world-service", serviceName = "Hello World Service")
                 input message: "Deploy to Production?"
             }
         }
