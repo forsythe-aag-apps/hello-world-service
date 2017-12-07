@@ -86,6 +86,8 @@ podTemplate(label: 'mypod', containers: [
            sh "kubectl create -f ./deployment/deployment.yml -n prod-${projectNamespace}"
            sh "kubectl create -f ./deployment/service.yml -n prod-${projectNamespace}"
            waitForRunningState("prod-${projectNamespace}")
+           printEndpoint(namespace: "prod-${projectNamespace}", serviceId: "hello-world-service",
+                               serviceName: "Hello World Service", port: "8080")
         }
     }
 }
