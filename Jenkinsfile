@@ -14,9 +14,9 @@ podTemplate(label: 'mypod', containers: [
     containerTemplate(image: 'docker', name: 'docker', command: 'cat', ttyEnabled: true),
     containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.8.0', command: 'cat', ttyEnabled: true),
   ], volumes: [
+    secretVolume(mountPath: '/root/.m2/', secretName: 'jenkins-maven-settings'),
     secretVolume(mountPath: '/home/jenkins/.docker', secretName: 'regsecret'),
-    hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock'),
-    hostPathVolume(hostPath: '/root/.m2', mountPath: '/home/jenkins/.m2')
+    hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')
   ], imagePullSecrets: [ 'regsecret' ]) {
 
     node('mypod') {
@@ -69,6 +69,7 @@ podTemplate(label: 'mypod', containers: [
                waitForRunningState {
                    namespace = projectNamespace
                }
+               waitForValidNamespaceState(projectNamespace)
             }
         }
         
