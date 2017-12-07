@@ -66,7 +66,9 @@ podTemplate(label: 'mypod', containers: [
                sh "kubectl delete service hello-world-service -n ${projectNamespace} --ignore-not-found=true"
                sh "kubectl create -f ./deployment/deployment.yml -n ${projectNamespace}"
                sh "kubectl create -f ./deployment/service.yml -n ${projectNamespace}"
-               waitForValidNamespaceState(projectNamespace)
+               waitForRunningState {
+                   namespace = projectNamespace
+               }
             }
         }
         
@@ -87,39 +89,4 @@ podTemplate(label: 'mypod', containers: [
            waitForValidNamespaceState(projectNamespace)
         }
     }
-}
-
-def waitForAllPodsRunning(String namespace) {
-    timeout(time: 3, unit: 'MINUTES') {
-        while (true) {
-            podsStatus = sh(returnStdout: true, script: "kubectl --namespace='${namespace}' get pods --no-headers").trim()
-            def notRunning = podsStatus.readLines().findAll { line -> !line.contains('Running') }
-            if (notRunning.isEmpty()) {
-                echo 'All pods are running'
-                break
-            }
-            sh "kubectl --namespace='${namespace}' get pods"
-            sleep 10
-        }
-    }
-}
-
-def waitForAllServicesRunning(String namespace) {
-    timeout(time: 3, unit: 'MINUTES') {
-        while (true) {
-            servicesStatus = sh(returnStdout: true, script: "kubectl --namespace='${namespace}' get services --no-headers").trim()
-            def notRunning = servicesStatus.readLines().findAll { line -> line.contains('pending') }
-            if (notRunning.isEmpty()) {
-                echo 'All pods are running'
-                break
-            }
-            sh "kubectl --namespace='${namespace}' get services"
-            sleep 10
-        }
-    }
-}
-
-def waitForValidNamespaceState(String namespace) {
-    waitForAllPodsRunning(namespace)
-    waitForAllServicesRunning(namespace)
 }
