@@ -28,7 +28,7 @@ podTemplate(label: 'mypod', containers: [
             }
         }
 
-        git 'https://github.com/cd-pipeline/hello-world-service.git'
+        git 'https://github.com/forsythe-aag-apps/hello-world-service.git'
         container('maven') {
             stage('Build a project') {
                 sh 'mvn clean install -DskipTests=true'
