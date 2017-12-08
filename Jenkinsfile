@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 
-@Library('github.com/ForsytheHostingSolutions/pipeline-library@master')
+@Library('github.com/ForsytheHostingSolutions/jenkins-pipeline-library@master')
 import com.forsythe.PipelineUtils
 def utils = new PipelineUtils(this)
 
