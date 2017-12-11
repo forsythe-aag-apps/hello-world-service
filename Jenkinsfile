@@ -17,7 +17,7 @@ podTemplate(label: 'mypod', containers: [
     secretVolume(mountPath: '/root/.m2/', secretName: 'jenkins-maven-settings'),
     secretVolume(mountPath: '/home/jenkins/.docker', secretName: 'regsecret'),
     hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock'),
-    persistentVolumeClaim(claimName: 'maven-repo', mountPath: '/root/.m2nrepo')
+    nfsVolume(mountPath: '/root/.m2nrepo', serverAddress: '10.19.251.85', serverPath: '/', readOnly: false)
   ], imagePullSecrets: [ 'regsecret' ]) {
 
     node('mypod') {
