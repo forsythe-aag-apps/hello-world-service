@@ -42,7 +42,7 @@ podTemplate(label: 'mypod', containers: [
             }
 
             stage('SonarQube Analysis') {
-                sonarQubeScanner()
+                sonarQubeScanner(){}
             }
 
             stage('Deploy project to Nexus') {
