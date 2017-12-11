@@ -24,7 +24,7 @@ podTemplate(label: 'mypod', containers: [
 
         container('kubectl') {
             stage('Configure Kubernetes') {
-                createNamespace(namespace: projectNamespace)
+                createNamespace(projectNamespace)
             }
         }
 
