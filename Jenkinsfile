@@ -21,6 +21,7 @@ podTemplate(label: 'mypod', containers: [
     node('mypod') {
         git 'https://github.com/forsythe-aag-apps/hello-world-service.git'
         def projectNamespace = "${env.JOB_NAME}".tokenize('/')[0]
+        echo "Project: ${env.JOB_NAME}"
 
         container('kubectl') {
             stage('Configure Kubernetes') {
