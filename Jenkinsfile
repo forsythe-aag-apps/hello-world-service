@@ -19,9 +19,8 @@ podTemplate(label: 'mypod', containers: [
   ], imagePullSecrets: [ 'regsecret' ]) {
 
     node('mypod') {
-        git 'https://github.com/forsythe-aag-apps/hello-world-service.git'
+        checkout scm
         def projectNamespace = "${env.JOB_NAME}".tokenize('/')[0]
-        echo "Project: ${env.JOB_NAME}"
 
         container('kubectl') {
             stage('Configure Kubernetes') {
