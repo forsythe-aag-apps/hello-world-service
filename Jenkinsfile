@@ -21,14 +21,15 @@ podTemplate(label: 'mypod', containers: [
   ], imagePullSecrets: [ 'regsecret' ]) {
 
     node('mypod') {
+        git 'https://github.com/forsythe-aag-apps/hello-world-service.git'
         def projectNamespace = utils.extractNamespace("${env.JOB_NAME}")
+
         container('kubectl') {
             stage('Configure Kubernetes') {
                 utils.createNamespace(projectNamespace)
             }
         }
 
-        git 'https://github.com/forsythe-aag-apps/hello-world-service.git'
         container('maven') {
             stage('Build a project') {
                 sh 'mvn clean install -DskipTests=true'
