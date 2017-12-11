@@ -20,11 +20,11 @@ podTemplate(label: 'mypod', containers: [
 
     node('mypod') {
         git 'https://github.com/forsythe-aag-apps/hello-world-service.git'
-        def projectNamespace = utils.extractNamespace("${env.JOB_NAME}")
+        def projectNamespace = "${env.JOB_NAME}".tokenize('/')[0]
 
         container('kubectl') {
             stage('Configure Kubernetes') {
-                utils.createNamespace(projectNamespace)
+                createNamespace(namespace: projectNamespace)
             }
         }
 
@@ -42,8 +42,7 @@ podTemplate(label: 'mypod', containers: [
             }
 
             stage('SonarQube Analysis') {
-                sonarQubeScanner {
-                }
+                sonarQubeScanner()
             }
 
             stage('Deploy project to Nexus') {
