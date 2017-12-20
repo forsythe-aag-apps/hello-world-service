@@ -21,6 +21,7 @@ podTemplate(label: 'mypod', containers: [
     node('mypod') {
         checkout scm
         def projectNamespace = "${env.JOB_NAME}".tokenize('/')[0]
+        echo "Job Name: ${env.JOB_NAME}"
 
         container('kubectl') {
             stage('Configure Kubernetes') {
