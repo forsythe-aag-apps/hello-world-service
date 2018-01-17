@@ -88,6 +88,7 @@ podTemplate(label: 'mypod', containers: [
                    sh "kubectl delete service hello-world-service -n ${projectNamespace} --ignore-not-found=true"
                    sh "kubectl create -f ./deployment/deployment.yml -n ${projectNamespace}"
                    sh "kubectl create -f ./deployment/service.yml -n ${projectNamespace}"
+                   sh "kubectl create -f ./deployment/prometheus-service-monitor.yml -n cicd-tools"
                    waitForRunningState(projectNamespace)
                 }
             }
@@ -106,7 +107,6 @@ podTemplate(label: 'mypod', containers: [
                sh "kubectl delete service hello-world-service -n prod-${projectNamespace} --ignore-not-found=true"
                sh "kubectl create -f ./deployment/deployment.yml -n prod-${projectNamespace}"
                sh "kubectl create -f ./deployment/service.yml -n prod-${projectNamespace}"
-               sh "kubectl create -f ./deployment/prometheus-service-monitor.yml -n cicd-tools"
                waitForRunningState("prod-${projectNamespace}")
                printEndpoint(namespace: "prod-${projectNamespace}", serviceId: "hello-world-service",
                                    serviceName: "Hello World Service", port: "8080")
