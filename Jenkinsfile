@@ -20,73 +20,96 @@ podTemplate(label: 'mypod', containers: [
 
     node('mypod') {
         checkout scm
+        def jobName = "${env.JOB_NAME}".tokenize('/').last()
         def projectNamespace = "${env.JOB_NAME}".tokenize('/')[0]
-        echo "Job Name: ${env.JOB_NAME}"
+        def ingressAddress = System.getenv("INGRESS_CONTROLLER_IP")
+        def accessToken = ""
 
-        container('kubectl') {
-            stage('Configure Kubernetes') {
-                createNamespace(projectNamespace)
+        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'github-token', usernameVariable: 'USERNAME', passwordVariable: 'GITHUB_ACCESS_TOKEN']]) {
+          accessToken = sh(returnStdout: true, script: 'echo $GITHUB_ACCESS_TOKEN').trim()
+        }
+
+        def pullRequest = false
+        if (jobName.startsWith("PR-")) {
+            pullRequest = true
+        }
+
+        if (!pullRequest) {
+            container('kubectl') {
+                stage('Configure Kubernetes') {
+                    createNamespace(projectNamespace)
+                }
             }
         }
 
-        container('maven') {
-            stage('Build a project') {
-                sh 'mvn clean install -DskipTests=true'
-            }
+        lock('maven-build') {
+            container('maven') {
+                stage('Build a project') {
+                    sh 'mvn clean install -DskipTests=true'
+                }
 
-            stage('Run tests') {
-                try {
-                    sh 'mvn clean install test'
-                } finally {
-                    junit 'target/surefire-reports/*.xml'
+                stage('Run tests') {
+                    try {
+                        sh 'mvn clean install test'
+                    } finally {
+                        junit 'target/surefire-reports/*.xml'
+                    }
+                }
+
+                stage('SonarQube Analysis') {
+                    if (!pullRequest) {
+                        sonarQubeScanner(accessToken, 'forsythe-aag-apps/hello-world-service', "http://sonarqube.${ingressAddress}.xip.io")
+                    } else {
+                        sonarQubePRScanner(accessToken, 'forsythe-aag-apps/hello-world-service', "http://sonarqube.${ingressAddress}.xip.io")
+                    }
+                }
+
+                if (!pullRequest) {
+                    stage('Deploy project to Nexus') {
+                        sh 'mvn -DskipTests=true package deploy'
+                        archiveArtifacts artifacts: 'target/*.jar'
+                    }
+                }
+            }
+        }
+
+        if (!pullRequest) {
+            container('docker') {
+                stage('Docker build') {
+                    sh 'docker build -t hello-world-service .'
+                    sh 'docker tag hello-world-service quay.io/zotovsa/hello-world-service'
+                    sh 'docker push quay.io/zotovsa/hello-world-service'
                 }
             }
 
-            stage('SonarQube Analysis') {
-                sonarQubeScanner(){}
+            container('kubectl') {
+                stage('Deploy MicroService') {
+                   sh "kubectl delete deployment hello-world-service -n ${projectNamespace} --ignore-not-found=true"
+                   sh "kubectl delete service hello-world-service -n ${projectNamespace} --ignore-not-found=true"
+                   sh "kubectl create -f ./deployment/deployment.yml -n ${projectNamespace}"
+                   sh "kubectl create -f ./deployment/service.yml -n ${projectNamespace}"
+                   waitForRunningState(projectNamespace)
+                }
             }
 
-            stage('Deploy project to Nexus') {
-                sh 'mvn -DskipTests=true package deploy'
-                archiveArtifacts artifacts: 'target/*.jar'
+            container('kubectl') {
+                timeout(time: 3, unit: 'MINUTES') {
+                    printEndpoint(namespace: projectNamespace, serviceId: "hello-world-service",
+                        serviceName: "Hello World Service", port: "8080")
+                    input message: "Deploy to Production?"
+                }
             }
-        }
-        
-        container('docker') {
-            stage('Docker build') {
-                sh 'docker build -t hello-world-service .'
-                sh 'docker tag hello-world-service quay.io/zotovsa/hello-world-service'
-                sh 'docker push quay.io/zotovsa/hello-world-service'
-            }
-        }
 
-        container('kubectl') {
-            stage('Deploy MicroService') {
-               sh "kubectl delete deployment hello-world-service -n ${projectNamespace} --ignore-not-found=true"
-               sh "kubectl delete service hello-world-service -n ${projectNamespace} --ignore-not-found=true"
-               sh "kubectl create -f ./deployment/deployment.yml -n ${projectNamespace}"
-               sh "kubectl create -f ./deployment/service.yml -n ${projectNamespace}"
-               waitForRunningState(projectNamespace)
+            container('kubectl') {
+               sh "kubectl create namespace prod-${projectNamespace} || true"
+               sh "kubectl delete deployment hello-world-service -n prod-${projectNamespace} --ignore-not-found=true"
+               sh "kubectl delete service hello-world-service -n prod-${projectNamespace} --ignore-not-found=true"
+               sh "kubectl create -f ./deployment/deployment.yml -n prod-${projectNamespace}"
+               sh "kubectl create -f ./deployment/service.yml -n prod-${projectNamespace}"
+               waitForRunningState("prod-${projectNamespace}")
+               printEndpoint(namespace: "prod-${projectNamespace}", serviceId: "hello-world-service",
+                                   serviceName: "Hello World Service", port: "8080")
             }
-        }
-        
-        container('kubectl') {
-            timeout(time: 3, unit: 'MINUTES') {
-                printEndpoint(namespace: projectNamespace, serviceId: "hello-world-service",
-                    serviceName: "Hello World Service", port: "8080")
-                input message: "Deploy to Production?"
-            }
-        }
-
-        container('kubectl') {
-           sh "kubectl create namespace prod-${projectNamespace} || true"
-           sh "kubectl delete deployment hello-world-service -n prod-${projectNamespace} --ignore-not-found=true"
-           sh "kubectl delete service hello-world-service -n prod-${projectNamespace} --ignore-not-found=true"
-           sh "kubectl create -f ./deployment/deployment.yml -n prod-${projectNamespace}"
-           sh "kubectl create -f ./deployment/service.yml -n prod-${projectNamespace}"
-           waitForRunningState("prod-${projectNamespace}")
-           printEndpoint(namespace: "prod-${projectNamespace}", serviceId: "hello-world-service",
-                               serviceName: "Hello World Service", port: "8080")
         }
     }
 }
