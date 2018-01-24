@@ -86,6 +86,7 @@ podTemplate(label: 'mypod', containers: [
                 stage('Deploy MicroService') {
                    sh "kubectl delete deployment hello-world-service -n ${projectNamespace} --ignore-not-found=true"
                    sh "kubectl delete service hello-world-service -n ${projectNamespace} --ignore-not-found=true"
+                   sh "kubectl delete -f ./deployment/prometheus-service-monitor.yml -n cicd-tools --ignore-not-found=true"
                    sh "kubectl create -f ./deployment/deployment.yml -n ${projectNamespace}"
                    sh "kubectl create -f ./deployment/service.yml -n ${projectNamespace}"
                    sh "kubectl create -f ./deployment/prometheus-service-monitor.yml -n cicd-tools"
