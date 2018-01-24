@@ -36,7 +36,8 @@ public class Application {
     public io.opentracing.Tracer jaegerTracer() {
         return new Configuration("spring-boot",
                 new Configuration.SamplerConfiguration(ProbabilisticSampler.TYPE, 1),
-                new Configuration.ReporterConfiguration(true, "jaeger-agent", 6832, 1000, 1000))
+                new Configuration.ReporterConfiguration(true,
+                        "jaeger-agent.kube-system.svc.cluster.local", 6832, 1000, 1000))
                 .getTracer();
     }
 }
