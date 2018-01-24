@@ -34,10 +34,10 @@ public class Application {
 
     @Bean
     public io.opentracing.Tracer jaegerTracer() {
-        return new Configuration("spring-boot",
+        return new Configuration("hello-world-service",
                 new Configuration.SamplerConfiguration(ConstSampler.TYPE, 1),
                 new Configuration.ReporterConfiguration(true,
-                        "jaeger-agent.kube-system.svc.cluster.local", 5775, 1000, 1000))
+                        "jaeger-agent.kube-system", 5775, 1000, 1000))
                 .getTracer();
     }
 }
