@@ -1,7 +1,7 @@
 package hello;
 
 import com.uber.jaeger.Configuration;
-import com.uber.jaeger.samplers.ProbabilisticSampler;
+import com.uber.jaeger.samplers.ConstSampler;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -35,9 +35,9 @@ public class Application {
     @Bean
     public io.opentracing.Tracer jaegerTracer() {
         return new Configuration("spring-boot",
-                new Configuration.SamplerConfiguration(ProbabilisticSampler.TYPE, 1),
+                new Configuration.SamplerConfiguration(ConstSampler.TYPE, 1),
                 new Configuration.ReporterConfiguration(true,
-                        "jaeger-agent.kube-system.svc.cluster.local", 6832, 1000, 1000))
+                        "jaeger-agent.kube-system.svc.cluster.local", 5775, 1000, 1000))
                 .getTracer();
     }
 }
