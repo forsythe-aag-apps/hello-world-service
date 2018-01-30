@@ -24,7 +24,7 @@ public class HelloController {
         String port = environment.getProperty("local.server.port");
         //String name = template.getForObject(String.format("http://localhost:%s/user", port), String.class);
         String name = "John Doe";
-        return String.format("<h2>Hello, %s!</h2", name);
+        return String.format("<h2>Hello, %s!</h2>", name);
     }
 
     @Timed
