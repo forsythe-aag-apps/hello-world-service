@@ -4,6 +4,7 @@ import io.micrometer.core.annotation.Timed;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 
 @RestController
 @Timed
@@ -15,9 +16,14 @@ public class HelloController {
     @Timed
     @RequestMapping("/")
     public String index() {
-        tracer.activeSpan().setBaggageItem("greetings", "hello");
-        return "Greetings from Spring Boot!";
+        RestTemplate template = new RestTemplate();
+        String name = template.getForObject("/user", String.class);
+        return String.format("Hello, %s!", name);
     }
 
-
+    @Timed
+    @RequestMapping("/user")
+    public String getUser() {
+        return "John Doe!";
+    }
 }
