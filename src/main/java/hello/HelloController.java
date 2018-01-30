@@ -17,7 +17,7 @@ public class HelloController {
     @RequestMapping("/")
     public String index() {
         RestTemplate template = new RestTemplate();
-        String name = template.getForObject("/user", String.class);
+        String name = template.getForObject("http://localhost:8080/user", String.class);
         return String.format("Hello, %s!", name);
     }
 
