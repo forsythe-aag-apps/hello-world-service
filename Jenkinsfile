@@ -77,6 +77,7 @@ podTemplate(label: 'mypod', containers: [
         if (!pullRequest) {
             container('docker') {
                 stage('Docker build') {
+                    sleep 1000
                     sh 'docker build -t hello-world-service .'
                     sh 'docker tag hello-world-service quay.io/zotovsa/hello-world-service'
                     sh 'docker push quay.io/zotovsa/hello-world-service'
