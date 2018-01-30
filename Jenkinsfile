@@ -14,7 +14,6 @@ podTemplate(label: 'mypod', containers: [
   ], volumes: [
     secretVolume(mountPath: '/root/.m2/', secretName: 'jenkins-maven-settings'),
     secretVolume(mountPath: '/home/jenkins/.docker', secretName: 'regsecret'),
-    secretVolume(mountPath: '/etc/docker/certs.d/harbor.35.192.52.128.xip.io', secretName: 'harbor-cert'),
     hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock'),
     persistentVolumeClaim(claimName: 'nfs', mountPath: '/root/.m2nrepo')
   ], imagePullSecrets: [ 'regsecret' ]) {
@@ -78,7 +77,7 @@ podTemplate(label: 'mypod', containers: [
         if (!pullRequest) {
             container('docker') {
                 stage('Docker build') {
-                    cat '/etc/docker/certs.d/harbor.35.192.52.128.xip.io/ca.crt'
+                    ls -la '/etc/docker/certs.d/'
                     sh 'docker build -t hello-world-service .'
                     sh 'docker login --username=admin --password=Harbor12345 harbor.35.192.52.128.xip.io'
                     sh 'docker tag hello-world-service harbor.35.192.52.128.xip.io/v2/library/hello-world-service'
