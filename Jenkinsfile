@@ -77,7 +77,7 @@ podTemplate(label: 'mypod', containers: [
         if (!pullRequest) {
             container('docker') {
                 stage('Docker build') {
-                    ls -la '/etc/docker/certs.d/'
+                    sh 'ls -la /etc/docker/certs.d/'
                     sh 'docker build -t hello-world-service .'
                     sh 'docker login --username=admin --password=Harbor12345 harbor.35.192.52.128.xip.io'
                     sh 'docker tag hello-world-service harbor.35.192.52.128.xip.io/v2/library/hello-world-service'
