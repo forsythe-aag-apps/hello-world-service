@@ -23,7 +23,7 @@ public class HelloController {
         RestTemplate template = new RestTemplate();
         String port = environment.getProperty("local.server.port");
         String name = template.getForObject("http://greetings-service.greetings-service:8080", String.class);
-        return String.format("<h2>Hello, %s!</h2>", name);
+        return String.format("<h2>Hello, %s!</h2>", "test");
     }
 
     @Timed
