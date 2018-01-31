@@ -25,7 +25,6 @@ podTemplate(label: 'mypod', containers: [
         projectNamespace = "cicd-tools"
         def ingressAddress = System.getenv("INGRESS_CONTROLLER_IP")
         def accessToken = ""
-        def registryAddress = ""
 
         withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'github-token', usernameVariable: 'USERNAME', passwordVariable: 'GITHUB_ACCESS_TOKEN']]) {
           accessToken = sh(returnStdout: true, script: 'echo $GITHUB_ACCESS_TOKEN').trim()
@@ -76,17 +75,11 @@ podTemplate(label: 'mypod', containers: [
         }
 
         if (!pullRequest) {
-
-            container('kubectl') {
-                registryAddress = sh(returnStdout: true, script: "kubectl get service registry -n kube-system --output jsonpath={.spec.clusterIP} --no-headers").trim()
-            }
-
             container('docker') {
                 stage('Docker build') {
-                    sh "docker login --username admin --password Harbor12345 ${registryAddress}:5000"
                     sh 'docker build -t hello-world-service .'
-                    sh "docker tag hello-world-service ${registryAddress}:5000/cicd-pipeline/hello-world-service"
-                    sh "docker push ${registryAddress}:5000/cicd-pipeline/hello-world-service"
+                    sh 'docker tag hello-world-service quay.io/zotovsa/hello-world-service'
+                    sh 'docker push quay.io/zotovsa/hello-world-service'
                 }
             }
 
