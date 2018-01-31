@@ -22,7 +22,6 @@ podTemplate(label: 'mypod', containers: [
         checkout scm
         def jobName = "${env.JOB_NAME}".tokenize('/').last()
         def projectNamespace = "${env.JOB_NAME}".tokenize('/')[0]
-        projectNamespace = "cicd-tools"
         def ingressAddress = System.getenv("INGRESS_CONTROLLER_IP")
         def accessToken = ""
 
