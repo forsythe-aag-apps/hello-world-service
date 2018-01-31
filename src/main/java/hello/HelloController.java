@@ -11,8 +11,8 @@ import org.springframework.web.client.RestTemplate;
 @Timed
 public class HelloController {
 
-    //@Autowired
-    //private io.opentracing.Tracer tracer;
+    @Autowired
+    private io.opentracing.Tracer tracer;
 
     @Autowired
     Environment environment;
