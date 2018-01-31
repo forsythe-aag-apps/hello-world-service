@@ -2,10 +2,13 @@ package hello;
 
 import io.micrometer.core.annotation.Timed;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
+
+import java.text.MessageFormat;
 
 @RestController
 @Timed
@@ -17,13 +20,18 @@ public class HelloController {
     @Autowired
     Environment environment;
 
+    @Value("${templates.index}")
+    private String indexTemplate;
+
+    @Autowired
+    private RestTemplate restTemplate;
+
     @Timed
     @RequestMapping("/")
     public String index() {
-        RestTemplate template = new RestTemplate();
         String port = environment.getProperty("local.server.port");
-        String name = template.getForObject(String.format("http://localhost:%s/user", port), String.class);
-        return String.format("<h2>Hello, %s!</h2>", name);
+        String name = restTemplate.getForObject(String.format("http://localhost:%s/user", port), String.class);
+        return MessageFormat.format(indexTemplate, name);
     }
 
     @Timed
