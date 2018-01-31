@@ -76,11 +76,6 @@ podTemplate(label: 'mypod', containers: [
         }
 
         if (!pullRequest) {
-
-            #container('kubectl') {
-            #registryAddress = sh(returnStdout: true, script: "kubectl --namespace='kube-system' get svc registry --no-headers --template '{{ range (index .status.loadBalancer.ingress 0) }}{{ . }}{{ end }}'").trim()
-            #}
-
             container('docker') {
                 stage('Docker build') {
                     sleep 1000
