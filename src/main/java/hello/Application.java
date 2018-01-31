@@ -2,6 +2,11 @@ package hello;
 
 import com.uber.jaeger.Configuration;
 import com.uber.jaeger.samplers.ConstSampler;
+import io.micrometer.core.instrument.binder.ClassLoaderMetrics;
+import io.micrometer.core.instrument.binder.JvmGcMetrics;
+import io.micrometer.core.instrument.binder.JvmThreadMetrics;
+import io.micrometer.core.instrument.binder.MeterBinder;
+import io.micrometer.core.instrument.binder.ProcessorMetrics;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -37,6 +42,26 @@ public class Application {
             }
 
         };
+    }
+
+    @Bean
+    public MeterBinder processMemoryMetrics() {
+        return new ClassLoaderMetrics();
+    }
+
+    @Bean
+    public MeterBinder processThreadMetrics() {
+        return new ProcessorMetrics();
+    }
+
+    @Bean
+    public MeterBinder jvmGcMetrics() {
+        return new JvmGcMetrics();
+    }
+
+    @Bean
+    public MeterBinder jvmThreadMetrics() {
+        return new JvmThreadMetrics();
     }
 
     @Bean
