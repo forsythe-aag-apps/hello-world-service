@@ -76,6 +76,11 @@ podTemplate(label: 'mypod', containers: [
         }
 
         if (!pullRequest) {
+
+            container('kubectl') {
+                registryAddress = sh(returnStdout: true, script: "kubectl get service registry -n kube-system --output jsonpath={.spec.clusterIP} --no-headers").trim()
+            }
+
             container('docker') {
                 stage('Docker build') {
                     sleep 1000
