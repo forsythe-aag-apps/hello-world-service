@@ -87,17 +87,20 @@ podTemplate(label: 'mypod', containers: [
                    sh "kubectl delete deployment hello-world-service -n ${projectNamespace} --ignore-not-found=true"
                    sh "kubectl delete service hello-world-service -n ${projectNamespace} --ignore-not-found=true"
                    sh "kubectl delete -f ./deployment/prometheus-service-monitor.yml -n cicd-tools --ignore-not-found=true"
+
+                   sh "sed -e 's/{{INGRESSIP}}/'${ingressAddress}'/g' ./deployment/ingress.yml > ./deployment/ingress2.yml"
+                   sh "kubectl delete -f ./deployment/ingress2.yml -n ${projectNamespace} --ignore-not-found=true"
                    sh "kubectl create -f ./deployment/deployment.yml -n ${projectNamespace}"
                    sh "kubectl create -f ./deployment/service.yml -n ${projectNamespace}"
                    sh "kubectl create -f ./deployment/prometheus-service-monitor.yml -n cicd-tools"
+                   sh "kubectl create -f ./deployment/ingress2.yml -n ${projectNamespace}"
                    waitForRunningState(projectNamespace)
+                   print "Greetings Service can be accessed at: http://hello-world-service.${ingressAddress}.xip.io"
                 }
             }
 
             container('kubectl') {
                 timeout(time: 3, unit: 'MINUTES') {
-                    printEndpoint(namespace: projectNamespace, serviceId: "hello-world-service",
-                        serviceName: "Hello World Service", port: "8080")
                     input message: "Deploy to Production?"
                 }
             }
@@ -106,11 +109,14 @@ podTemplate(label: 'mypod', containers: [
                sh "kubectl create namespace prod-${projectNamespace} || true"
                sh "kubectl delete deployment hello-world-service -n prod-${projectNamespace} --ignore-not-found=true"
                sh "kubectl delete service hello-world-service -n prod-${projectNamespace} --ignore-not-found=true"
+               sh "sed -e 's/{{INGRESSIP}}/'${ingressAddress}'/g' ./deployment/prod-ingress.yml > ./deployment/prod-ingress2.yml"
+               sh "kubectl delete -f ./deployment/prod-ingress2.yml -n prod-${projectNamespace} --ignore-not-found=true"
                sh "kubectl create -f ./deployment/deployment.yml -n prod-${projectNamespace}"
                sh "kubectl create -f ./deployment/service.yml -n prod-${projectNamespace}"
+               sh "kubectl create -f ./deployment/prod-ingress2.yml -n prod-${projectNamespace}"
+
                waitForRunningState("prod-${projectNamespace}")
-               printEndpoint(namespace: "prod-${projectNamespace}", serviceId: "hello-world-service",
-                                   serviceName: "Hello World Service", port: "8080")
+               print "Greetings Service can be accessed at: http://prod-hello-world-service.${ingressAddress}.xip.io"
             }
         }
     }
