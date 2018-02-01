@@ -1,0 +1,12 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: hello-world-service
+spec:
+  rules:
+  - host: prod-hello-world-service.{{INGRESSIP}}.xip.io
+    http:
+      paths:
+      - backend:
+          serviceName: hello-world-service
+          servicePort: 8080
