@@ -96,6 +96,7 @@ podTemplate(label: 'mypod', containers: [
                    sh "kubectl create -f ./deployment/ingress2.yml -n ${projectNamespace}"
                    waitForRunningState(projectNamespace)
                    print "Greetings Service can be accessed at: http://hello-world-service.${ingressAddress}.xip.io"
+                   rocketSend channel: 'general', message: "Hello World Service deployed successfully at http://hello-world-service.${ingressAddress}.xip.io", rawMessage: true
                 }
             }
 
