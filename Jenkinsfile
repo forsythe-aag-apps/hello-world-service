@@ -21,85 +21,92 @@ podTemplate(label: 'mypod', containers: [
     node('mypod') {
         checkout scm
         def jobName = "${env.JOB_NAME}".tokenize('/').last()
-        def projectNamespace = "${env.JOB_NAME}".tokenize('/')[0]
-        def ingressAddress = System.getenv("INGRESS_CONTROLLER_IP")
-        def accessToken = ""
-
-        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'github-token', usernameVariable: 'USERNAME', passwordVariable: 'GITHUB_ACCESS_TOKEN']]) {
-          accessToken = sh(returnStdout: true, script: 'echo $GITHUB_ACCESS_TOKEN').trim()
-        }
-
         def pullRequest = false
         if (jobName.startsWith("PR-")) {
             pullRequest = true
         }
+        def projectNamespace = "${env.JOB_NAME}".tokenize('/')[0]
+        def ingressAddress = System.getenv("INGRESS_CONTROLLER_IP")
 
-        if (!pullRequest) {
-            container('kubectl') {
-                stage('Configure Kubernetes') {
-                    createNamespace(projectNamespace)
-                }
+        try {
+            def accessToken = ""
+
+            withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'github-token', usernameVariable: 'USERNAME', passwordVariable: 'GITHUB_ACCESS_TOKEN']]) {
+              accessToken = sh(returnStdout: true, script: 'echo $GITHUB_ACCESS_TOKEN').trim()
             }
-        }
 
-        lock('maven-build') {
-            container('maven') {
-                stage('Build a project') {
-                    sh 'mvn clean install -DskipTests=true'
-                }
-
-                stage('Run tests') {
-                    try {
-                        sh 'mvn clean install test'
-                    } finally {
-                        junit 'target/surefire-reports/*.xml'
+            if (!pullRequest) {
+                container('kubectl') {
+                    stage('Configure Kubernetes') {
+                        createNamespace(projectNamespace)
                     }
                 }
+            }
 
-                stage('SonarQube Analysis') {
+            lock('maven-build') {
+                container('maven') {
+                    stage('Build a project') {
+                        sh 'mvn clean install -DskipTests=true'
+                    }
+
+                    stage('Run tests') {
+                        try {
+                            sh 'mvn clean install test'
+                        } finally {
+                            junit 'target/surefire-reports/*.xml'
+                        }
+                    }
+
+                    stage('SonarQube Analysis') {
+                        if (!pullRequest) {
+                            sonarQubeScanner(accessToken, 'forsythe-aag-apps/hello-world-service', "http://sonarqube.${ingressAddress}.xip.io")
+                        } else {
+                            sonarQubePRScanner(accessToken, 'forsythe-aag-apps/hello-world-service', "http://sonarqube.${ingressAddress}.xip.io")
+                        }
+                    }
+
                     if (!pullRequest) {
-                        sonarQubeScanner(accessToken, 'forsythe-aag-apps/hello-world-service', "http://sonarqube.${ingressAddress}.xip.io")
-                    } else {
-                        sonarQubePRScanner(accessToken, 'forsythe-aag-apps/hello-world-service', "http://sonarqube.${ingressAddress}.xip.io")
-                    }
-                }
-
-                if (!pullRequest) {
-                    stage('Deploy project to Nexus') {
-                        sh 'mvn -DskipTests=true package deploy'
-                        archiveArtifacts artifacts: 'target/*.jar'
+                        stage('Deploy project to Nexus') {
+                            sh 'mvn -DskipTests=true package deploy'
+                            archiveArtifacts artifacts: 'target/*.jar'
+                        }
                     }
                 }
             }
+
+            if (!pullRequest) {
+                container('docker') {
+                    stage('Docker build') {
+                        sh 'docker build -t hello-world-service .'
+                        sh 'docker tag hello-world-service quay.io/zotovsa/hello-world-service'
+                        sh 'docker push quay.io/zotovsa/hello-world-service'
+                    }
+                }
+
+                container('kubectl') {
+                    stage('Deploy MicroService') {
+                       sh "kubectl delete deployment hello-world-service -n ${projectNamespace} --ignore-not-found=true"
+                       sh "kubectl delete service hello-world-service -n ${projectNamespace} --ignore-not-found=true"
+                       sh "kubectl delete -f ./deployment/prometheus-service-monitor.yml -n cicd-tools --ignore-not-found=true"
+
+                       sh "sed -e 's/{{INGRESSIP}}/'${ingressAddress}'/g' ./deployment/ingress.yml > ./deployment/ingress2.yml"
+                       sh "kubectl delete -f ./deployment/ingress2.yml -n ${projectNamespace} --ignore-not-found=true"
+                       sh "kubectl create -f ./deployment/deployment.yml -n ${projectNamespace}"
+                       sh "kubectl create -f ./deployment/service.yml -n ${projectNamespace}"
+                       sh "kubectl create -f ./deployment/prometheus-service-monitor.yml -n cicd-tools"
+                       sh "kubectl create -f ./deployment/ingress2.yml -n ${projectNamespace}"
+                       waitForRunningState(projectNamespace)
+                       print "Greetings Service can be accessed at: http://hello-world-service.${ingressAddress}.xip.io"
+                       rocketSend channel: 'general', message: "@here Hello World Service deployed successfully at http://hello-world-service.${ingressAddress}.xip.io", rawMessage: true
+                    }
+                }
+            }
+        } catch (all) {
+            currentBuild.result = 'FAILURE'
+            rocketSend channel: 'general', message: "@here Hello World Service build failed", rawMessage: true
         }
 
         if (!pullRequest) {
-            container('docker') {
-                stage('Docker build') {
-                    sh 'docker build -t hello-world-service .'
-                    sh 'docker tag hello-world-service quay.io/zotovsa/hello-world-service'
-                    sh 'docker push quay.io/zotovsa/hello-world-service'
-                }
-            }
-
-            container('kubectl') {
-                stage('Deploy MicroService') {
-                   sh "kubectl delete deployment hello-world-service -n ${projectNamespace} --ignore-not-found=true"
-                   sh "kubectl delete service hello-world-service -n ${projectNamespace} --ignore-not-found=true"
-                   sh "kubectl delete -f ./deployment/prometheus-service-monitor.yml -n cicd-tools --ignore-not-found=true"
-
-                   sh "sed -e 's/{{INGRESSIP}}/'${ingressAddress}'/g' ./deployment/ingress.yml > ./deployment/ingress2.yml"
-                   sh "kubectl delete -f ./deployment/ingress2.yml -n ${projectNamespace} --ignore-not-found=true"
-                   sh "kubectl create -f ./deployment/deployment.yml -n ${projectNamespace}"
-                   sh "kubectl create -f ./deployment/service.yml -n ${projectNamespace}"
-                   sh "kubectl create -f ./deployment/prometheus-service-monitor.yml -n cicd-tools"
-                   sh "kubectl create -f ./deployment/ingress2.yml -n ${projectNamespace}"
-                   waitForRunningState(projectNamespace)
-                   print "Greetings Service can be accessed at: http://hello-world-service.${ingressAddress}.xip.io"
-                   rocketSend channel: 'general', message: "@here Hello World Service deployed successfully at http://hello-world-service.${ingressAddress}.xip.io", rawMessage: true
-                }
-            }
-
             container('kubectl') {
                 timeout(time: 3, unit: 'MINUTES') {
                     input message: "Deploy to Production?"
