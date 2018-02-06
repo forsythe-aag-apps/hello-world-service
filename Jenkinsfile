@@ -27,6 +27,7 @@ podTemplate(label: 'mypod', containers: [
         }
         def projectNamespace = "${env.JOB_NAME}".tokenize('/')[0]
         def ingressAddress = System.getenv("INGRESS_CONTROLLER_IP")
+        def registryAddress = ""
 
         try {
             def accessToken = ""
@@ -75,6 +76,19 @@ podTemplate(label: 'mypod', containers: [
             }
 
             if (!pullRequest) {
+                container('kubectl') {
+                    registryAddress = sh(returnStdout: true, script: "kubectl get service registry -n kube-system --output jsonpath={.spec.clusterIP} --no-headers").trim()
+                }
+
+                container('docker') {
+                    stage('Docker build') {
+                        sh "docker login --username admin --password Harbor12345 ${registryAddress}:5000"
+                        sh 'docker build -t hello-world-service .'
+                        sh "docker tag hello-world-service ${registryAddress}:5000/library/hello-world-service"
+                        sh "docker push ${registryAddress}:5000/library/hello-world-service"
+                    }
+                }
+
                 container('docker') {
                     stage('Docker build') {
                         sh 'docker build -t hello-world-service .'
