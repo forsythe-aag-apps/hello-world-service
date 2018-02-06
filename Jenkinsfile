@@ -84,8 +84,8 @@ podTemplate(label: 'mypod', containers: [
                     stage('Docker build') {
                         sh "docker login --username admin --password Harbor12345 ${registryAddress}:5000"
                         sh 'docker build -t hello-world-service .'
-                        sh "docker tag hello-world-service ${registryAddress}:5000/library/hello-world-service"
-                        sh "docker push ${registryAddress}:5000/library/hello-world-service"
+                        sh "docker tag hello-world-service ${registryAddress}:5000/test/hello-world-service"
+                        sh "docker push ${registryAddress}:5000/test/hello-world-service"
                     }
                 }
 
