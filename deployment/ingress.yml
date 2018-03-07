@@ -4,7 +4,7 @@ metadata:
   name: hello-world-service
 spec:
   rules:
-  - host: hello-world-service.{{INGRESSIP}}.xip.io
+  - host: hello-world-service.api.cicd.siriuscloudservices.com
     http:
       paths:
       - backend:

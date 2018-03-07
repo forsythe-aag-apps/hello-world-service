@@ -11,7 +11,7 @@ spec:
     spec:
       containers:
         - name: hello-world-service
-          image: quay.io/zotovsa/hello-world-service
+          image: registry.cicd.siriuscloudservices.com/library/hello-world-service
           ports:
             - containerPort: 8080
               name: http

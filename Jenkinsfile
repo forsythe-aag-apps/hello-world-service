@@ -26,8 +26,6 @@ podTemplate(label: 'mypod', containers: [
             pullRequest = true
         }
         def projectNamespace = "${env.JOB_NAME}".tokenize('/')[0]
-        def ingressAddress = System.getenv("INGRESS_CONTROLLER_IP")
-        def registryAddress = ""
 
         try {
             def accessToken = ""
@@ -58,14 +56,6 @@ podTemplate(label: 'mypod', containers: [
                         }
                     }
 
-                    stage('SonarQube Analysis') {
-                        if (!pullRequest) {
-                            sonarQubeScanner(accessToken, 'forsythe-aag-apps/hello-world-service', "http://sonarqube.${ingressAddress}.xip.io")
-                        } else {
-                            sonarQubePRScanner(accessToken, 'forsythe-aag-apps/hello-world-service', "http://sonarqube.${ingressAddress}.xip.io")
-                        }
-                    }
-
                     if (!pullRequest) {
                         stage('Deploy project to Nexus') {
                             sh 'mvn -DskipTests=true package deploy'
@@ -76,24 +66,12 @@ podTemplate(label: 'mypod', containers: [
             }
 
             if (!pullRequest) {
-                container('kubectl') {
-                    registryAddress = sh(returnStdout: true, script: "kubectl get service registry -n kube-system --output jsonpath={.spec.clusterIP} --no-headers").trim()
-                }
-
                 container('docker') {
                     stage('Docker build') {
-                        sh "docker login --username admin --password Harbor12345 ${registryAddress}:5000"
+                        sh "docker login --username admin --password Harbor12345 registry.cicd.siriuscloudservices.com"
                         sh 'docker build -t hello-world-service .'
-                        sh "docker tag hello-world-service ${registryAddress}:5000/test/hello-world-service"
-                        sh "docker push ${registryAddress}:5000/test/hello-world-service"
-                    }
-                }
-
-                container('docker') {
-                    stage('Docker build') {
-                        sh 'docker build -t hello-world-service .'
-                        sh 'docker tag hello-world-service quay.io/zotovsa/hello-world-service'
-                        sh 'docker push quay.io/zotovsa/hello-world-service'
+                        sh "docker tag hello-world-service registry.cicd.siriuscloudservices.com/library/hello-world-service"
+                        sh "docker push registry.cicd.siriuscloudservices.com/library/hello-world-service"
                     }
                 }
 
@@ -103,21 +81,18 @@ podTemplate(label: 'mypod', containers: [
                        sh "kubectl delete service hello-world-service -n ${projectNamespace} --ignore-not-found=true"
                        sh "kubectl delete -f ./deployment/prometheus-service-monitor.yml -n cicd-tools --ignore-not-found=true"
 
-                       sh "sed -e 's/{{INGRESSIP}}/'${ingressAddress}'/g' ./deployment/ingress.yml > ./deployment/ingress2.yml"
-                       sh "kubectl delete -f ./deployment/ingress2.yml -n ${projectNamespace} --ignore-not-found=true"
+                       sh "kubectl delete -f ./deployment/ingress.yml -n ${projectNamespace} --ignore-not-found=true"
                        sh "kubectl create -f ./deployment/deployment.yml -n ${projectNamespace}"
                        sh "kubectl create -f ./deployment/service.yml -n ${projectNamespace}"
                        sh "kubectl create -f ./deployment/prometheus-service-monitor.yml -n cicd-tools"
-                       sh "kubectl create -f ./deployment/ingress2.yml -n ${projectNamespace}"
+                       sh "kubectl create -f ./deployment/ingress.yml -n ${projectNamespace}"
                        waitForRunningState(projectNamespace)
-                       print "Greetings Service can be accessed at: http://hello-world-service.${ingressAddress}.xip.io"
-                       rocketSend channel: 'general', message: "@here Hello World Service deployed successfully at http://hello-world-service.${ingressAddress}.xip.io", rawMessage: true
+                       print "Greetings Service can be accessed at: http://hello-world-service.api.cicd.siriuscloudservices.com"
                     }
                 }
             }
         } catch (all) {
             currentBuild.result = 'FAILURE'
-            rocketSend channel: 'general', message: "@here Hello World Service build failed", rawMessage: true
         }
 
         if (!pullRequest) {
@@ -131,14 +106,13 @@ podTemplate(label: 'mypod', containers: [
                sh "kubectl create namespace prod-${projectNamespace} || true"
                sh "kubectl delete deployment hello-world-service -n prod-${projectNamespace} --ignore-not-found=true"
                sh "kubectl delete service hello-world-service -n prod-${projectNamespace} --ignore-not-found=true"
-               sh "sed -e 's/{{INGRESSIP}}/'${ingressAddress}'/g' ./deployment/prod-ingress.yml > ./deployment/prod-ingress2.yml"
-               sh "kubectl delete -f ./deployment/prod-ingress2.yml -n prod-${projectNamespace} --ignore-not-found=true"
+               sh "kubectl delete -f ./deployment/prod-ingress.yml -n prod-${projectNamespace} --ignore-not-found=true"
                sh "kubectl create -f ./deployment/deployment.yml -n prod-${projectNamespace}"
                sh "kubectl create -f ./deployment/service.yml -n prod-${projectNamespace}"
-               sh "kubectl create -f ./deployment/prod-ingress2.yml -n prod-${projectNamespace}"
+               sh "kubectl create -f ./deployment/prod-ingress.yml -n prod-${projectNamespace}"
 
                waitForRunningState("prod-${projectNamespace}")
-               print "Greetings Service can be accessed at: http://prod-hello-world-service.${ingressAddress}.xip.io"
+               print "Greetings Service can be accessed at: http://prod-hello-world-service.api.cicd.siriuscloudservices.com"
             }
         }
     }
