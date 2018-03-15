@@ -68,6 +68,7 @@ podTemplate(label: 'mypod', containers: [
             if (!pullRequest) {
                 container('docker') {
                     stage('Docker build') {
+                        sleep 120
                         sh "docker login --username admin --password Harbor12345 registry.cicd.siriuscloudservices.com"
                         sh 'docker build -t hello-world-service .'
                         sh "docker tag hello-world-service registry.cicd.siriuscloudservices.com/library/hello-world-service"
