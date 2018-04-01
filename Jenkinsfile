@@ -55,6 +55,14 @@ podTemplate(label: 'mypod', containers: [
                         }
                     }
 
+                    stage('SonarQube Analysis') {
+                        if (!pullRequest) {
+                            sonarQubeScanner(accessToken, 'forsythe-aag-apps/hello-world-service', "https://sonarqube.api.cicd.siriuscloudservices.com")
+                        } else {
+                            sonarQubePRScanner(accessToken, 'forsythe-aag-apps/hello-world-service', "https://sonarqube.api.cicd.siriuscloudservices.com")
+                        }
+                    }
+
                     if (!pullRequest) {
                         stage('Deploy project to Nexus') {
                             sh 'mvn -DskipTests=true package deploy'
@@ -66,12 +74,13 @@ podTemplate(label: 'mypod', containers: [
 
             if (!pullRequest) {
                 container('docker') {
-                    stage('Docker build') {
-                        sleep 120
-                        sh "docker login --username admin --password Harbor12345 registry.cicd.siriuscloudservices.com"
-                        sh 'docker build -t hello-world-service .'
-                        sh "docker tag hello-world-service registry.cicd.siriuscloudservices.com/library/hello-world-service"
-                        sh "docker push registry.cicd.siriuscloudservices.com/library/hello-world-service"
+                    container('docker') {
+                        stage('Docker build') {
+                            sleep 120
+                            sh 'docker build -t hello-world-service .'
+                            sh "docker tag hello-world-service registry.cicd.siriuscloudservices.com/library/hello-world-service"
+                            sh "docker push registry.cicd.siriuscloudservices.com/library/hello-world-service"
+                        }
                     }
                 }
 
@@ -79,18 +88,22 @@ podTemplate(label: 'mypod', containers: [
                     stage('Deploy MicroService') {
                        sh "kubectl delete deployment hello-world-service -n ${projectNamespace} --ignore-not-found=true"
                        sh "kubectl delete service hello-world-service -n ${projectNamespace} --ignore-not-found=true"
+                       sh "kubectl delete -f ./deployment/prometheus-service-monitor.yml -n cicd-tools --ignore-not-found=true"
 
                        sh "kubectl delete -f ./deployment/ingress.yml -n ${projectNamespace} --ignore-not-found=true"
                        sh "kubectl create -f ./deployment/deployment.yml -n ${projectNamespace}"
                        sh "kubectl create -f ./deployment/service.yml -n ${projectNamespace}"
+                       sh "kubectl create -f ./deployment/prometheus-service-monitor.yml -n cicd-tools"
                        sh "kubectl create -f ./deployment/ingress.yml -n ${projectNamespace}"
                        waitForRunningState(projectNamespace)
                        print "Greetings Service can be accessed at: http://hello-world-service.api.cicd.siriuscloudservices.com"
+                       rocketSend channel: 'general', message: "@here Greetings Service deployed successfully at http://hello-world-service.api.cicd.siriuscloudservices.com", rawMessage: true
                     }
                 }
             }
         } catch (all) {
             currentBuild.result = 'FAILURE'
+            rocketSend channel: 'general', message: "@here Greetings Service build failed", rawMessage: true
         }
 
         if (!pullRequest) {
