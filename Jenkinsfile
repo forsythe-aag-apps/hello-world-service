@@ -18,6 +18,7 @@ podTemplate(label: 'mypod', containers: [
   ], imagePullSecrets: [ 'regsecret' ]) {
 
     node('mypod') {
+        rocketSend channel: 'general', message: "@here Hello World Service build started", rawMessage: true
         checkout scm
         def jobName = "${env.JOB_NAME}".tokenize('/').last()
         def pullRequest = false
@@ -103,7 +104,7 @@ podTemplate(label: 'mypod', containers: [
             }
         } catch (all) {
             currentBuild.result = 'FAILURE'
-            rocketSend channel: 'general', message: "@here Greetings Service build failed", rawMessage: true
+            rocketSend channel: 'general', message: "@here Hello World Service build failed", rawMessage: true
         }
 
         if (!pullRequest) {
@@ -123,7 +124,7 @@ podTemplate(label: 'mypod', containers: [
                sh "kubectl create -f ./deployment/prod-ingress.yml -n prod-${projectNamespace}"
 
                waitForRunningState("prod-${projectNamespace}")
-               print "Greetings Service can be accessed at: http://prod-hello-world-service.api.cicd.siriuscloudservices.com"
+               print "Hello World Service can be accessed at: http://prod-hello-world-service.api.cicd.siriuscloudservices.com"
             }
         }
     }
