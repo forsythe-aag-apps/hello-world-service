@@ -79,8 +79,8 @@ podTemplate(label: 'mypod', containers: [
                         stage('Docker build') {
                             sleep 120
                             sh 'docker build -t hello-world-service .'
-                            sh "docker tag hello-world-service registry.cicd.siriuscloudservices.com/library/hello-world-service"
-                            sh "docker push registry.cicd.siriuscloudservices.com/library/hello-world-service"
+                            sh "docker tag hello-world-service registry.api.cicd.siriuscloudservices.com/library/hello-world-service"
+                            sh "docker push registry.api.cicd.siriuscloudservices.com/library/hello-world-service"
                         }
                     }
                 }
