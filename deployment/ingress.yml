@@ -1,12 +1,12 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: hello-world-service
+  name: {{SERVICE_NAME}}
 spec:
   rules:
-  - host: hello-world-service.api.cicd.siriuscloudservices.com
+  - host: {{SERVICE_NAME}}.api.cicd.siriuscloudservices.com
     http:
       paths:
       - backend:
-          serviceName: hello-world-service
+          serviceName: {{SERVICE_NAME}}
           servicePort: 8080

@@ -1,16 +1,16 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: hello-world-service
+  name: {{SERVICE_NAME}}
   labels:
     team: frontend
 spec:
   selector:
     matchLabels:
-      app: hello-world-service
+      app: {{SERVICE_NAME}}
   namespaceSelector:
     matchNames:
-    - "hello-world-service"
+    - "{{SERVICE_NAME}}"
   endpoints:
   - port: http
     path: /prometheus

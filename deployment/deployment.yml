@@ -1,17 +1,17 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: hello-world-service
+  name: {{SERVICE_NAME}}
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: hello-world-service
+        app: {{SERVICE_NAME}}
     spec:
       containers:
-        - name: hello-world-service
-          image: registry.api.cicd.siriuscloudservices.com/library/hello-world-service
+        - name: {{SERVICE_NAME}}
+          image: registry.api.cicd.siriuscloudservices.com/library/{{SERVICE_NAME}}
           ports:
             - containerPort: 8080
               name: http
@@ -21,3 +21,6 @@ spec:
               port: 8080
             initialDelaySeconds: 30
             timeoutSeconds: 30
+      imagePullSecrets:
+        - name: regsecret
+
