@@ -120,7 +120,7 @@ podTemplate(label: 'mypod', containers: [
         if (!pullRequest) {
             container('kubectl') {
                 timeout(time: 3, unit: 'MINUTES') {
-                    rocketSend channel: 'jenkins', message: "@here ${serviceName} - waiting approval. [Click here](${env.JENKINS_URL}/blue/organizations/jenkins/greetings-service/detail/master/${env.BUILD_NUMBER}/pipeline)", rawMessage: true
+                    rocketSend channel: 'jenkins', message: "@here ${serviceName} - waiting approval. [Click here](${env.JENKINS_URL}/blue/organizations/jenkins/${serviceName}/detail/master/${env.BUILD_NUMBER}/pipeline)", rawMessage: true
                     input message: "Deploy to Production?"
                 }
             }
