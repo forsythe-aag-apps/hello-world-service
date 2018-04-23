@@ -21,6 +21,7 @@ podTemplate(label: 'mypod', containers: [
         def jobName = "${env.JOB_NAME}".tokenize('/').last()
         def serviceName = "${env.JOB_NAME}".tokenize('/')[0]
         def projectNamespace = serviceName
+        def repositoryName = serviceName
 
         rocketSend channel: 'jenkins', message: "@here ${serviceName} build started", rawMessage: true
         checkout scm
@@ -81,8 +82,8 @@ podTemplate(label: 'mypod', containers: [
                         stage('Docker build') {
                             sleep 120
                             sh "docker build -t ${serviceName} ."
-                            sh "docker tag ${serviceName} registry.api.cicd.siriuscloudservices.com/library/${serviceName}"
-                            sh "docker push registry.api.cicd.siriuscloudservices.com/library/${serviceName}"
+                            sh "docker tag ${serviceName} registry.api.cicd.siriuscloudservices.com/library/${repositoryName}"
+                            sh "docker push registry.api.cicd.siriuscloudservices.com/library/${repositoryName}"
                         }
                     }
                 }
@@ -90,7 +91,7 @@ podTemplate(label: 'mypod', containers: [
                 container('kubectl') {
                     stage('Deploy MicroService') {
                        sh """
-                           sed -e 's/{{SERVICE_NAME}}/'$serviceName'/g' ./deployment/deployment.yml  > ./deployment/deployment2.yml
+                           sed -e 's/{{SERVICE_NAME}}/'$serviceName'/g' ./deployment/deployment.yml | sed -e 's/{{REPOSITORY_NAME}}/$repositoryName'/g' > ./deployment/deployment2.yml
                            sed -e 's/{{SERVICE_NAME}}/'$serviceName'/g' ./deployment/service.yml  > ./deployment/service2.yml
                            sed -e 's/{{SERVICE_NAME}}/'$serviceName'/g' ./deployment/prometheus-service-monitor.yml  > ./deployment/prometheus-service-monitor2.yml
                            sed -e 's/{{SERVICE_NAME}}/'$serviceName'/g' ./deployment/ingress.yml  > ./deployment/ingress2.yml
@@ -129,7 +130,7 @@ podTemplate(label: 'mypod', containers: [
                serviceName = "prod-${serviceName}"
                projectNamespace = serviceName
                sh """
-                   sed -e 's/{{SERVICE_NAME}}/'$serviceName'/g' ./deployment/deployment.yml  > ./deployment/deployment2.yml
+                   sed -e 's/{{SERVICE_NAME}}/'$serviceName'/g' ./deployment/deployment.yml | sed -e 's/{{REPOSITORY_NAME}}/$repositoryName'/g' > ./deployment/deployment2.yml
                    sed -e 's/{{SERVICE_NAME}}/'$serviceName'/g' ./deployment/service.yml  > ./deployment/service2.yml
                    sed -e 's/{{SERVICE_NAME}}/'$serviceName'/g' ./deployment/prometheus-service-monitor.yml  > ./deployment/prometheus-service-monitor2.yml
                    sed -e 's/{{SERVICE_NAME}}/'$serviceName'/g' ./deployment/ingress.yml  > ./deployment/ingress2.yml
