@@ -91,7 +91,7 @@ podTemplate(label: 'mypod', containers: [
                 container('kubectl') {
                     stage('Deploy MicroService') {
                        sh """
-                           sed -e 's/{{SERVICE_NAME}}/'$serviceName'/g' ./deployment/deployment.yml | sed -e 's/{{REPOSITORY_NAME}}/$repositoryName'/g' > ./deployment/deployment2.yml
+                           sed -e 's/{{SERVICE_NAME}}/'$serviceName'/g' ./deployment/deployment.yml | sed -e 's/{{REPOSITORY_NAME}}/'$repositoryName'/g' > ./deployment/deployment2.yml
                            sed -e 's/{{SERVICE_NAME}}/'$serviceName'/g' ./deployment/service.yml  > ./deployment/service2.yml
                            sed -e 's/{{SERVICE_NAME}}/'$serviceName'/g' ./deployment/prometheus-service-monitor.yml  > ./deployment/prometheus-service-monitor2.yml
                            sed -e 's/{{SERVICE_NAME}}/'$serviceName'/g' ./deployment/ingress.yml  > ./deployment/ingress2.yml
@@ -130,7 +130,7 @@ podTemplate(label: 'mypod', containers: [
                serviceName = "prod-${serviceName}"
                projectNamespace = serviceName
                sh """
-                   sed -e 's/{{SERVICE_NAME}}/'$serviceName'/g' ./deployment/deployment.yml | sed -e 's/{{REPOSITORY_NAME}}/$repositoryName'/g' > ./deployment/deployment2.yml
+                   sed -e 's/{{SERVICE_NAME}}/'$serviceName'/g' ./deployment/deployment.yml | sed -e 's/{{REPOSITORY_NAME}}/'$repositoryName'/g' > ./deployment/deployment2.yml
                    sed -e 's/{{SERVICE_NAME}}/'$serviceName'/g' ./deployment/service.yml  > ./deployment/service2.yml
                    sed -e 's/{{SERVICE_NAME}}/'$serviceName'/g' ./deployment/prometheus-service-monitor.yml  > ./deployment/prometheus-service-monitor2.yml
                    sed -e 's/{{SERVICE_NAME}}/'$serviceName'/g' ./deployment/ingress.yml  > ./deployment/ingress2.yml
