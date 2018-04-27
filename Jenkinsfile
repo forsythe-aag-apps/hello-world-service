@@ -108,6 +108,7 @@ podTemplate(label: 'mypod', containers: [
                        """
 
                        waitForRunningState(projectNamespace)
+                       sleep 30
                        print "${serviceName} can be accessed at: http://${serviceName}.api.cicd.siriuscloudservices.com"
                        rocketSend channel: 'jenkins', message: "@here ${serviceName} deployed successfully at http://${serviceName}.api.cicd.siriuscloudservices.com", rawMessage: true
                     }
@@ -147,6 +148,7 @@ podTemplate(label: 'mypod', containers: [
                """
 
                waitForRunningState(projectNamespace)
+               sleep 30
                rocketSend channel: 'jenkins', message: "@here ${serviceName} deployed successfully at http://${serviceName}.api.cicd.siriuscloudservices.com", rawMessage: true
                print "${serviceName} can be accessed at: http://${serviceName}.api.cicd.siriuscloudservices.com"
             }
