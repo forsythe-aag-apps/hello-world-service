@@ -18,6 +18,7 @@ podTemplate(label: 'mypod', containers: [
   ], imagePullSecrets: [ 'regsecret' ]) {
 
     node('mypod') {
+        sleep 30
         def jobName = "${env.JOB_NAME}".tokenize('/').last()
         def serviceName = "${env.JOB_NAME}".tokenize('/')[0]
         def projectNamespace = serviceName
