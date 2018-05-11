@@ -19,6 +19,7 @@ podTemplate(label: 'mypod', containers: [
 
     node('mypod') {
         def jobName = "${env.JOB_NAME}".tokenize('/').last()
+        def branchName = jobName.replace("%2F", "/")
         def serviceName = "${env.JOB_NAME}".tokenize('/')[0]
         def projectNamespace = serviceName
         def repositoryName = serviceName
@@ -30,6 +31,11 @@ podTemplate(label: 'mypod', containers: [
             pullRequest = true
         }
 
+        def featureBranch = false
+        if (!branchName.equals("master")) {
+            featureBranch = true
+        }
+
         try {
             def accessToken = ""
 
@@ -37,7 +43,7 @@ podTemplate(label: 'mypod', containers: [
               accessToken = sh(returnStdout: true, script: 'echo $GITHUB_ACCESS_TOKEN').trim()
             }
 
-            if (!pullRequest) {
+            if (!pullRequest && !featureBranch) {
                 container('kubectl') {
                     stage('Configure Kubernetes') {
                         sleep 30
@@ -62,13 +68,13 @@ podTemplate(label: 'mypod', containers: [
 
                     stage('SonarQube Analysis') {
                         if (!pullRequest) {
-                            sonarQubeScanner(accessToken, "forsythe-aag-apps/${serviceName}", "https://sonarqube.api.cicd.siriuscloudservices.com")
+                            sonarQubeScanner(accessToken, "forsythe-aag-apps/${serviceName}", "https://sonarqube.api.cicd.siriuscloudservices.com", branchName)
                         } else {
                             sonarQubePRScanner(accessToken, "forsythe-aag-apps/${serviceName}", "https://sonarqube.api.cicd.siriuscloudservices.com")
                         }
                     }
 
-                    if (!pullRequest) {
+                    if (!pullRequest && !featureBranch) {
                         stage('Deploy project to Nexus') {
                             sh 'mvn -DskipTests=true package deploy'
                             archiveArtifacts artifacts: 'target/*.jar'
@@ -77,7 +83,7 @@ podTemplate(label: 'mypod', containers: [
                 }
             }
 
-            if (!pullRequest) {
+            if (!pullRequest && !featureBranch) {
                 container('docker') {
                     container('docker') {
                         stage('Docker build') {
@@ -120,7 +126,7 @@ podTemplate(label: 'mypod', containers: [
             rocketSend channel: 'jenkins', message: "@here ${serviceName} build failed", rawMessage: true
         }
 
-        if (!pullRequest) {
+        if (!pullRequest && !featureBranch) {
             container('kubectl') {
                 timeout(time: 3, unit: 'MINUTES') {
                     rocketSend channel: 'jenkins', message: "@here ${serviceName} - waiting approval. [Click here](${env.JENKINS_URL}/blue/organizations/jenkins/${serviceName}/detail/master/${env.BUILD_NUMBER}/pipeline)", rawMessage: true
@@ -150,7 +156,7 @@ podTemplate(label: 'mypod', containers: [
                """
 
                waitForRunningState(projectNamespace)
-               sleep 30
+               sleep 60
                rocketSend channel: 'jenkins', message: "@here ${serviceName} deployed successfully at http://${serviceName}.api.cicd.siriuscloudservices.com", rawMessage: true
                print "${serviceName} can be accessed at: http://${serviceName}.api.cicd.siriuscloudservices.com"
             }
