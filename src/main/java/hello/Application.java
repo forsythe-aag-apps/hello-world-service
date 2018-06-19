@@ -69,7 +69,7 @@ public class Application {
         return new Configuration("hello-world-service",
                 new Configuration.SamplerConfiguration(ConstSampler.TYPE, 1),
                 new Configuration.ReporterConfiguration(true,
-                        "jaeger-agent", 5775, 1000, 1000))
+                        "jaeger-agent.cicd-tools", 5775, 1000, 1000))
                 .getTracer();
     }
 }
