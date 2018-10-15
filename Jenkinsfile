@@ -24,7 +24,7 @@ podTemplate(label: 'mypod', containers: [
         def projectNamespace = serviceName
         def repositoryName = serviceName
 
-        rocketSend channel: 'jenkins', message: "@here ${serviceName} build started", rawMessage: true
+        rocketSend channel: 'general', message: "@here ${serviceName} build started", rawMessage: true
         checkout scm
         def pullRequest = false
         if (jobName.startsWith("PR-")) {
@@ -117,19 +117,19 @@ podTemplate(label: 'mypod', containers: [
                        waitForRunningState(projectNamespace)
                        sleep 30
                        print "${serviceName} can be accessed at: http://${serviceName}.api.cicd.aagsiriuscom.com"
-                       rocketSend channel: 'jenkins', message: "@here ${serviceName} deployed successfully at http://${serviceName}.api.cicd.aagsiriuscom.com", rawMessage: true
+                       rocketSend channel: 'general', message: "@here ${serviceName} deployed successfully at http://${serviceName}.api.cicd.aagsiriuscom.com", rawMessage: true
                     }
                 }
             }
         } catch (all) {
             currentBuild.result = 'FAILURE'
-            rocketSend channel: 'jenkins', message: "@here ${serviceName} build failed", rawMessage: true
+            rocketSend channel: 'general', message: "@here ${serviceName} build failed", rawMessage: true
         }
 
         if (!pullRequest && !featureBranch) {
             container('kubectl') {
                 timeout(time: 3, unit: 'MINUTES') {
-                    rocketSend channel: 'jenkins', message: "@here ${serviceName} - waiting approval. [Click here](${env.JENKINS_URL}/blue/organizations/jenkins/${serviceName}/detail/master/${env.BUILD_NUMBER}/pipeline)", rawMessage: true
+                    rocketSend channel: 'general', message: "@here ${serviceName} - waiting approval. [Click here](${env.JENKINS_URL}/blue/organizations/jenkins/${serviceName}/detail/master/${env.BUILD_NUMBER}/pipeline)", rawMessage: true
                     input message: "Deploy to Production?"
                 }
             }
@@ -157,7 +157,7 @@ podTemplate(label: 'mypod', containers: [
 
                waitForRunningState(projectNamespace)
                sleep 60
-               rocketSend channel: 'jenkins', message: "@here ${serviceName} deployed successfully at http://${serviceName}.api.cicd.aagsiriuscom.com", rawMessage: true
+               rocketSend channel: 'general', message: "@here ${serviceName} deployed successfully at http://${serviceName}.api.cicd.aagsiriuscom.com", rawMessage: true
                print "${serviceName} can be accessed at: http://${serviceName}.api.cicd.aagsiriuscom.com"
             }
         }
