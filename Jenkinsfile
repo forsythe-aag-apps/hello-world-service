@@ -89,8 +89,8 @@ podTemplate(label: 'mypod', containers: [
                         stage('Docker build') {
                             sleep 120
                             sh "docker build -t ${serviceName} ."
-                            sh "docker tag ${serviceName} registry.api.cicd.siriuscloudservices.com/library/${repositoryName}"
-                            sh "docker push registry.api.cicd.siriuscloudservices.com/library/${repositoryName}"
+                            sh "docker tag ${serviceName} registry.api.cicd.aagsiriuscom.com/library/${repositoryName}"
+                            sh "docker push registry.api.cicd.aagsiriuscom.com/library/${repositoryName}"
                         }
                     }
                 }
@@ -116,8 +116,8 @@ podTemplate(label: 'mypod', containers: [
 
                        waitForRunningState(projectNamespace)
                        sleep 30
-                       print "${serviceName} can be accessed at: http://${serviceName}.api.cicd.siriuscloudservices.com"
-                       rocketSend channel: 'jenkins', message: "@here ${serviceName} deployed successfully at http://${serviceName}.api.cicd.siriuscloudservices.com", rawMessage: true
+                       print "${serviceName} can be accessed at: http://${serviceName}.api.cicd.aagsiriuscom.com"
+                       rocketSend channel: 'jenkins', message: "@here ${serviceName} deployed successfully at http://${serviceName}.api.cicd.aagsiriuscom.com", rawMessage: true
                     }
                 }
             }
