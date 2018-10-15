@@ -11,7 +11,7 @@ spec:
     spec:
       containers:
         - name: {{SERVICE_NAME}}
-          image: registry.api.cicd.siriuscloudservices.com/library/{{REPOSITORY_NAME}}
+          image: registry.api.cicd.aagsiriuscom.com/library/{{REPOSITORY_NAME}}
           ports:
             - containerPort: 8080
               name: http
