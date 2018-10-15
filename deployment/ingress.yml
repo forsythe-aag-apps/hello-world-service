@@ -4,7 +4,7 @@ metadata:
   name: {{SERVICE_NAME}}
 spec:
   rules:
-  - host: {{SERVICE_NAME}}.api.cicd.siriuscloudservices.com
+  - host: {{SERVICE_NAME}}.api.cicd.aagsiriuscom.com
     http:
       paths:
       - backend:
